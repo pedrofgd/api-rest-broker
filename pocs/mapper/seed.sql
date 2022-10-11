@@ -1,39 +1,5 @@
 BEGIN;
 
-DROP TABLE [resources];
-DROP TABLE [providers];
-DROP TABLE [dictionary];
-
-CREATE TABLE IF NOT EXISTS [resources] (
-   id INTEGER NOT NULL PRIMARY KEY,
-   name TEXT NOT NULL,
-   intended_response_time_ms INTEGER NOT NULL,
-   timedout_response_time_ms INTEGER NOT NULL,
-   threshold_count_exceeded_intended_response_time INTEGER NOT NULL,
-   threshold_count_timedout_request INTEGER NOT NULL,
-   thershold_count_error INTEGER NOT NULL,
-   threshold_interval_hours INTEGER NOT NULL
-   );
-
-CREATE TABLE IF NOT EXISTS [providers] (
-   id INTEGER NOT NULL PRIMARY KEY,
-   url TEXT NOT NULL,
-   resource_id INTEGER NOT NULL,
-   priority INTEGER NOT NULL,
-   healthcheck_frequency_seconds INTEGER NOT NULL,
-   FOREIGN KEY (resource_id) REFERENCES resources(id)
-   );
-
-CREATE TABLE IF NOT EXISTS [dictionary] (
-   id INTEGER PRIMARY KEY,
-   provider_id INTEGER NOT NULL,
-   payload_type TEXT NOT NULL,
-   response_http_status_code INTEGER NOT NULL,
-   provider_key_name TEXT NOT NULL,
-   resource_key_name TEXT NOT NULL,
-   FOREIGN KEY (provider_id) REFERENCES providers(id)
-   );
-
 DELETE FROM resources;
 DELETE FROM providers;
 DELETE FROM dictionary;
@@ -41,7 +7,7 @@ DELETE FROM dictionary;
 INSERT INTO resources 
 VALUES (
    1, -- id
-   'randomtest', -- name
+   'numbers', -- name
    100, -- intended_response_time_ms
    200, -- timedout_response_time_ms
    10, -- threshold_count_exceeded_intended_response_time
@@ -60,29 +26,44 @@ VALUES (
    );
 
 INSERT INTO dictionary
-VALUES (
-   1, -- id
-   1, -- provider_id
-   'request', -- payload_type
-   0, -- response_http_status_code
-   'mapped_filed_1', -- provider_key_name
-   'field_1' -- resource_key_name
-   ),
-   (2,1,'request',0,'mapped_request_field_2','field_2'),
-   (3,1,'request',0,'mapped_request_field_3','field_3'),
-   (4,1,'request',0,'mapped_request_field_4','field_4'),
-   (5,1,'request',0,'mapped_request_field_5','field_5'),
-   (6,1,'request',0,'mapped_request_field_6','field_6'),
-   (7,1,'request',0,'mapped_request_field_7','field_7'),
-   (8,1,'request',0,'mapped_request_field_8','field_8'),
-   (9,1,'request',0,'mapped_request_field_9','field_9'),
-   (10,1,'request',0,'mapped_request_field_10','field_10'),
-   (11,1,'request',0,'mapped_request_field_11','field_11'),
-   (12,1,'request',0,'mapped_request_field_12','field_12'),
-   (13,1,'request',0,'mapped_request_field_13','field_13'),
-   (14,1,'request',0,'mapped_request_field_14','field_14'),
-   (15,1,'request',0,'mapped_request_field_15','field_15'),
-   (16,1,'response',0,'mapped_response_field_1','response_filed_1'),
-   (17,1,'response',0,'mapped_response_field_2','response_filed_2'),
-   (18,1,'response',0,'mapped_response_field_3','response_filed_3');
+VALUES
+   (1, 1, 'request', 0, 'zero', 'zero'),
+   (2, 1, 'request', 0, 'one', 'um'),
+   (3, 1, 'request', 0, 'two', 'dois'),
+   (4, 1, 'request', 0, 'three', 'tres'),
+   (5, 1, 'request', 0, 'four', 'quatro'),
+   (6, 1, 'request', 0, 'five', 'cinco'),
+   (7, 1, 'request', 0, 'six', 'seis'),
+   (8, 1, 'request', 0, 'seven', 'sete'),
+   (9, 1, 'request', 0, 'eight', 'oito'),
+   (10, 1, 'request', 0, 'nine', 'nove'),
+   (11, 1, 'request', 0, 'ten', 'dez'),
+   (12, 1, 'request', 0, 'eleven', 'onze'),
+   (13, 1, 'request', 0, 'twelve', 'doze'),
+   (14, 1, 'request', 0, 'thirteen', 'treze'),
+   (15, 1, 'request', 0, 'fourteen', 'quatorze'),
+   (16, 1, 'request', 0, 'fifteen', 'quinze'),
+   (17, 1, 'request', 0, 'sixteen', 'dezesseis'),
+   (18, 1, 'request', 0, 'seventeen', 'dezessete'),
+   (19, 1, 'request', 0, 'eighteen', 'dezoito'),
+   (20, 1, 'request', 0, 'nineteen', 'dezenove'),
+   (21, 1, 'request', 0, 'twenty', 'vinte'),
+   (22, 1, 'request', 0, 'twenty_one', 'vinte_um'),
+   (23, 1, 'request', 0, 'twenty_two', 'vinte_dois'),
+   (24, 1, 'request', 0, 'twenty_three', 'vinte_três'),
+   (25, 1, 'request', 0, 'twenty_four', 'vinte_quatro'),
+   (26, 1, 'request', 0, 'twenty_five', 'vinte_cinco'),
+   (27, 1, 'request', 0, 'twenty_six', 'vinte_seis'),
+   (28, 1, 'request', 0, 'twenty_seven', 'vinte_sete'),
+   (29, 1, 'request', 0, 'twenty_eight', 'vinte_oito'),
+   (30, 1, 'request', 0, 'twenty_nine', 'vinte_nove'),
+   (31, 1, 'request', 0, 'thirty', 'trinta'),
+   (32, 1, 'request', 0, 'thirty_one', 'trinta_um'),
+   (33, 1, 'request', 0, 'thirty_two', 'trinta_dois'),
+   (34, 1, 'request', 0, 'thirty_three', 'trinta_tres'),
+   (35, 1, 'request', 0, 'thirty_four', 'trinta_quatro'),
+   (36, 1, 'request', 0, 'thirty_five', 'trinta_cinco'),
+   (37, 1, 'request', 0, 'thirty_six', 'trinta_seis'),
+   (38, 1, 'request', 0, 'thirty_seven', 'trinta_sete'),
+   (39, 1, 'request', 0, 'thirty_eight', 'trinta_oito');
 COMMIT;

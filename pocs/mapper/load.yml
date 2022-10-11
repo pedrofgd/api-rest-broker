@@ -1,0 +1,51 @@
+config:
+  target: "http://localhost:8080"
+  http:
+    timeout: 100
+  phases:
+    - duration: 10
+      arrivalRate: 10
+scenarios:
+  - flow:
+      - post:
+          url: "/numbers"
+          json:
+            zero: "teste"
+            um: "teste"
+            dois: "teste"
+            tres: "teste"
+            quatro: "teste"
+            cinco: "teste"
+            seis: "teste"
+            sete: "teste"
+            oito: "teste"
+            nove: "teste"
+            dez: "teste"
+            onze: "teste"
+            doze: "teste"
+            treze: "teste"
+            quatorze: "teste"
+            quinze: "teste"
+            dezesseis: "teste"
+            dezessete: "teste"
+            dezoito: "teste"
+            dezenove: "teste"
+            vinte: "teste"
+            vinte_um: "teste"
+            vinte_dois: "teste"
+            vinte_três: "teste"
+            vinte_quatro: "teste"
+            vinte_cinco: "teste"
+            vinte_seis: "teste"
+            vinte_sete: "teste"
+            vinte_oito: "teste"
+            vinte_nove: "teste"
+            trinta: "teste"
+            trinta_um: "teste"
+            trinta_dois: "teste"
+            trinta_tres: "teste"
+            trinta_quatro: "teste"
+            trinta_cinco: "teste"
+            trinta_seis: "teste"
+            trinta_sete: "teste"
+            trinta_oito: "teste"
