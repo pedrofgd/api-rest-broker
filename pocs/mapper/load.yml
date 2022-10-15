@@ -2,8 +2,9 @@ config:
   target: "http://localhost:8080"
   http:
     timeout: 100
+    extendedMetrics: true
   phases:
-    - duration: 10
+    - duration: 60
       arrivalRate: 10
 scenarios:
   - flow:

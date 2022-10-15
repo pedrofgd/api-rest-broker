@@ -15,15 +15,15 @@ func main() {
 }
 
 func handleRequest(c *gin.Context) {
-	resource := c.Param("resource")
 	var body map[string]interface{}
 	if err := c.BindJSON(&body); err != nil {
 		return
 	}
-
+	
+	resource := c.Param("resource")
 	mapped := Mappper(resource, body)
 	var jsonMapped any
 	json.Unmarshal([]byte(mapped), &jsonMapped)
 
-	c.IndentedJSON(http.StatusOK, jsonMapped)
+	c.IndentedJSON(http.StatusOK, body)
 }
