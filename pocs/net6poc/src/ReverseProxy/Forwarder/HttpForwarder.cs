@@ -11,7 +11,7 @@ public static class HttpForwarder
 {
     private static readonly HttpClient HttpClient = new();
     
-    public static async Task<HttpResponseMessage> ForwardRequest(TargetResolver resolver, HttpContext context)
+    public static async Task<HttpResponseMessage> ForwardRequest(ProviderResolved resolver, HttpContext context)
     {
         var watchProviderResponse = Stopwatch.StartNew();
         

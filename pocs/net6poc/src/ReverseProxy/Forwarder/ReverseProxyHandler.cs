@@ -1,39 +1,37 @@
 using System.Diagnostics;
+using ReverseProxy.Resolver;
 
 namespace ReverseProxy.Forwarder;
 
 public class ReverseProxyHandler
 {
-  private readonly IServiceScopeFactory _serviceScopeFactory;
-  private readonly HttpContext _httpContext;
-  private readonly IConfiguration _configuration;
+  private readonly ILogger<ReverseProxyHandler> _logger;
+  private readonly TargetResolver _targetResolver;
 
-  public ReverseProxyHandler(IServiceScopeFactory serviceScopeFactory,
-    HttpContext httpContext, IConfiguration configuration)
+  public ReverseProxyHandler(
+    RequestDelegate next,
+    ILogger<ReverseProxyHandler> logger,
+    TargetResolver targetResolver)
   {
-    _serviceScopeFactory = serviceScopeFactory;
-    _httpContext = httpContext;
-    _configuration = configuration;
+    _logger = logger;
+    _targetResolver = targetResolver;
   }
 
-  public async Task Invoke()
+  public async Task Invoke(HttpContext context)
   {
     var watchProxyResponse = Stopwatch.StartNew();
-    var scope = _serviceScopeFactory.CreateScope();
-    var logger = scope.ServiceProvider.GetRequiredService<ILogger<ReverseProxyHandler>>();
+
+    var target = _targetResolver.ResolveTarget(context.Request);
     
-    var targetResolver = new Resolver.TargetResolver(_configuration);
-    targetResolver.BuildTargetUri(_httpContext.Request);
-    
-    using var responseMessage = await HttpForwarder.ForwardRequest(targetResolver, _httpContext);
-    _httpContext.Response.StatusCode = (int)responseMessage.StatusCode;
-    CopyFromTargetResponseHeaders(_httpContext, responseMessage);
+    using var responseMessage = await HttpForwarder.ForwardRequest(target, context);
+    context.Response.StatusCode = (int)responseMessage.StatusCode;
+    CopyFromTargetResponseHeaders(context, responseMessage);
     
     watchProxyResponse.Stop();
-    logger.LogInformation("Total time elapsed for proxy to provider {TargetProvider}: {ElapsedMilliseconds}", 
-      targetResolver.TargetProvider!.Name, watchProxyResponse.ElapsedMilliseconds);
+    _logger.LogInformation("Total time elapsed for proxy to provider {TargetProvider}: {ElapsedMilliseconds}", 
+      target.TargetProvider.Name, watchProxyResponse.ElapsedMilliseconds);
     
-    await responseMessage.Content.CopyToAsync(_httpContext.Response.Body);
+    await responseMessage.Content.CopyToAsync(context.Response.Body);
   }
 
   private void CopyFromTargetResponseHeaders(HttpContext context, HttpResponseMessage responseMessage)
