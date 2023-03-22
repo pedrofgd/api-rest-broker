@@ -4,6 +4,15 @@ namespace ApiBroker.API.Identificacao;
 
 public class Identificador
 {
+    /*
+     * todo: incluir como propriedades da classe o que for necessário para chamar o provedor
+     *  Qual é o recurso solicitado
+     *  Quais são os provedores disponíveis
+     *      Url base
+     *      Parâmetros na rota
+     *      Parâmetros no corpo
+     */
+    
     /// <summary>
     /// Identifica o recurso solicitado pelo cliente com base no nome enviado na requisição
     /// </summary>

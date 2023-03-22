@@ -18,12 +18,14 @@ public class BrokerHandler
     public async Task Invoke(HttpContext context)
     {
         var recurso = ObterRecursoSolicitado(context.Request.Path);
-        if (recurso is null) 
+        if (recurso is null)
             return;
         
         var provedorAlvo = ObterProvedorAlvo(recurso.Provedores);
         if (provedorAlvo is null) 
             return;
+        
+        // todo: pendente de incluir os parâmetros da requisição (rota e/ou body)
 
         var respostaProvedor = await EnviarRequisicaoProvedor(provedorAlvo, context);
 
