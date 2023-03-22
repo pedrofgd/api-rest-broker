@@ -4,22 +4,13 @@ namespace ApiBroker.API.Identificacao;
 
 public class Identificador
 {
-    /*
-     * todo: incluir como propriedades da classe o que for necessário para chamar o provedor
-     *  Qual é o recurso solicitado
-     *  Quais são os provedores disponíveis
-     *      Url base
-     *      Parâmetros na rota
-     *      Parâmetros no corpo
-     */
-    
     /// <summary>
     /// Identifica o recurso solicitado pelo cliente com base no nome enviado na requisição
     /// </summary>
     /// <param name="rota">Rota da requisição que o cliente fez no Broker</param>
     /// <param name="configuracoes">Configurações definidas pelo cliente</param>
     /// <returns>Recurso solicitado pelo cliente</returns>
-    public Recurso? IdentificarRecursoSolicitado(PathString rota, IConfiguration configuracoes)
+    public SolicitacaoDto? IdentificarRecursoSolicitado(PathString rota, IConfiguration configuracoes)
     {
         if (!rota.StartsWithSegments("/api", out var infoRequisicao))
             return null;
@@ -28,8 +19,25 @@ public class Identificador
             return null;
 
         var infosRequisicao = infoRequisicao.Value.Split("/")[1..];
+        
         var nomeRecurso = infosRequisicao[0];
-        return ObterRecurso(nomeRecurso, configuracoes);
+        var recurso = ObterRecurso(nomeRecurso, configuracoes);
+        if (recurso is null)
+            return null;
+
+        var parametrosRotaEsperados = recurso.ParametrosViaRota;
+        var parametrosRotaRecebidos = infosRequisicao[1..];
+        var parametrosRotaMapeados = ObterParametrosRota(parametrosRotaEsperados, parametrosRotaRecebidos);
+        if (parametrosRotaMapeados is null)
+            return null;
+
+        return new SolicitacaoDto
+        {
+            Nome = recurso.Nome,
+            Provedores = recurso.Provedores,
+            ParametrosRota = parametrosRotaMapeados,
+            CamposResposta = recurso.CamposResposta
+        };
     }
 
     /// <summary>
@@ -38,9 +46,25 @@ public class Identificador
     /// <param name="nome">Nome configurado para o recurso</param>
     /// <param name="configuration">Configurações definidas pelo cliente</param>
     /// <returns>Recurso solicitado se existir</returns>
-    private Recurso? ObterRecurso(string nome, IConfiguration configuration)
+    private RecursoSettings? ObterRecurso(string nome, IConfiguration configuration)
     {
-        var recursos = configuration.Get<List<Recurso>>();
+        var recursos = configuration.GetSection(RecursoSettings.RecursoConfig).Get<List<RecursoSettings>>();
         return recursos?.FirstOrDefault(r => r.Nome == nome);
+    }
+
+    private Dictionary<string, string>? ObterParametrosRota(IReadOnlyList<string> nomesParametrosRota, IReadOnlyList<string> valoresParametrosRota)
+    {
+        if (nomesParametrosRota.Count != valoresParametrosRota.Count)
+            return null;
+
+        var parametros = new Dictionary<string, string>();
+        for (var i = 0; i < nomesParametrosRota.Count; i++)
+        {
+            var nome = nomesParametrosRota[i];
+            var valor = valoresParametrosRota[i];
+            parametros[nome] = valor;
+        }
+
+        return parametros;
     }
 }
