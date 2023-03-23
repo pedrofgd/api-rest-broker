@@ -1,3 +1,4 @@
+using System.Net;
 using ApiBroker.API.Configuracoes;
 using ApiBroker.API.Identificacao;
 using ApiBroker.API.Mapeamento;
@@ -31,8 +32,6 @@ public class BrokerHandler
         var respostaProvedor = await EnviarRequisicaoProvedor(requisicao);
 
         var respostaMapeada = mapeador.MapearResposta(respostaProvedor, provedorAlvo, solicitacao.CamposResposta, context);
-        if (respostaMapeada is null) 
-            return;
         
         context.Response.StatusCode = (int)respostaMapeada.StatusCode;
         mapeador.CopiarHeadersRespostaProvedor(context, respostaMapeada);
