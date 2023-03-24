@@ -20,3 +20,5 @@ Documentação:
 2. Acessar o portal do InfluxDB
 3. Ir no ícone de "seta para cima" e em "Buckets", depois em "logs", que é o nome do bucket criado para registrar os resultados do Broker
 4. Selecionar `metricas_recursos` na aba de filtros (parte inferior) e ativar o toogle "View Raw Data'. Depois clicar em "Submit"
+
+<img width="1440" alt="Captura de Tela 2023-03-23 às 21 53 40" src="https://user-images.githubusercontent.com/50634340/227397983-e79ce956-3771-4f75-9e2f-94d5a6fafacd.png">
