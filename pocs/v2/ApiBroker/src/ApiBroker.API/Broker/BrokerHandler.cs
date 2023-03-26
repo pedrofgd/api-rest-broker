@@ -1,6 +1,7 @@
 using ApiBroker.API.Configuracoes;
 using ApiBroker.API.Identificacao;
 using ApiBroker.API.Mapeamento;
+using ApiBroker.API.Requisicao;
 
 namespace ApiBroker.API.Broker;
 
@@ -28,7 +29,8 @@ public class BrokerHandler
         var mapeador = new Mapeador();
         var requisicao = mapeador.MapearRequisicao(context, solicitacao, provedorAlvo);
         
-        var respostaProvedor = await EnviarRequisicaoProvedor(requisicao);
+        var requisitor = new Requisitor();
+        var respostaProvedor = await requisitor.EnviarRequisicaoProvedor(requisicao);
 
         var respostaMapeada = mapeador.MapearResposta(respostaProvedor, provedorAlvo, solicitacao.CamposResposta, context);
         if (respostaMapeada is null) 
@@ -68,11 +70,5 @@ public class BrokerHandler
         var random = new Random();
         var provedorAleatorio = random.Next(provedores.Count);
         return provedores[provedorAleatorio];
-    }
-
-    private async Task<HttpResponseMessage> EnviarRequisicaoProvedor(HttpRequestMessage requisicao)
-    {
-        var httpClient = new HttpClient();
-        return await httpClient.SendAsync(requisicao);
     }
 }
