@@ -2,6 +2,7 @@ using System.Diagnostics;
 using ApiBroker.API.Configuracoes;
 using ApiBroker.API.Identificacao;
 using ApiBroker.API.Mapeamento;
+using ApiBroker.API.Requisicao;
 using ApiBroker.API.Monitoramento;
 
 namespace ApiBroker.API.Broker;
@@ -30,7 +31,8 @@ public class BrokerHandler
         var mapeador = new Mapeador();
         var requisicao = mapeador.MapearRequisicao(context, solicitacao, provedorAlvo);
         
-        var (respostaProvedor, tempoRespostaMs) = await EnviarRequisicaoProvedor(requisicao);
+        var requisitor = new Requisitor();
+        var (respostaProvedor, tempoRespostaMs) = await requisitor.EnviarRequisicaoProvedor(requisicao);
 
         var respostaMapeada = mapeador.MapearResposta(respostaProvedor, provedorAlvo, solicitacao.CamposResposta, context);
         
@@ -70,14 +72,6 @@ public class BrokerHandler
         var random = new Random();
         var provedorAleatorio = random.Next(provedores.Count);
         return provedores[provedorAleatorio];
-    }
-
-    private async Task<Tuple<HttpResponseMessage, long>> EnviarRequisicaoProvedor(HttpRequestMessage requisicao)
-    {
-        var watch = Stopwatch.StartNew();
-        var httpClient = new HttpClient();
-        var resultado = await httpClient.SendAsync(requisicao); 
-        return new Tuple<HttpResponseMessage, long>(resultado, watch.ElapsedMilliseconds);
     }
 
     private void LogResultado(SolicitacaoDto solicitacao, ProvedorSettings provedorAlvo,
