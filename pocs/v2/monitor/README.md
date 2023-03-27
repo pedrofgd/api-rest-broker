@@ -71,3 +71,6 @@ from(bucket: "logs")
     |> mean(column: "_value")
 ```
 <img width="1252" alt="Captura de Tela 2023-03-24 às 13 23 59" src="https://user-images.githubusercontent.com/50634340/227583833-78590e99-6926-4497-98b6-d3a87c1d3e7b.png">
+
+**Referência e documentações:**
+* [InfluxDB University](https://university.influxdata.com/courses/influxdb-essentials-tutorial/course/)
