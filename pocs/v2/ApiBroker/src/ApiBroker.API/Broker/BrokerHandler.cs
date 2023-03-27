@@ -33,9 +33,7 @@ public class BrokerHandler
         var (respostaProvedor, tempoRespostaMs) = await EnviarRequisicaoProvedor(requisicao);
 
         var respostaMapeada = mapeador.MapearResposta(respostaProvedor, provedorAlvo, solicitacao.CamposResposta, context);
-        if (respostaMapeada is null) 
-            return;
-
+        
         LogResultado(solicitacao, provedorAlvo, respostaProvedor, tempoRespostaMs);
         
         context.Response.StatusCode = (int)respostaMapeada.StatusCode;
