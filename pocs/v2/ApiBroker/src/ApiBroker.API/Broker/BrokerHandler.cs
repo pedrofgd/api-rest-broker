@@ -1,7 +1,9 @@
+using System.Diagnostics;
 using ApiBroker.API.Configuracoes;
 using ApiBroker.API.Identificacao;
 using ApiBroker.API.Mapeamento;
 using ApiBroker.API.Requisicao;
+using ApiBroker.API.Monitoramento;
 
 namespace ApiBroker.API.Broker;
 
@@ -30,11 +32,11 @@ public class BrokerHandler
         var requisicao = mapeador.MapearRequisicao(context, solicitacao, provedorAlvo);
         
         var requisitor = new Requisitor();
-        var respostaProvedor = await requisitor.EnviarRequisicaoProvedor(requisicao);
+        var (respostaProvedor, tempoRespostaMs) = await requisitor.EnviarRequisicaoProvedor(requisicao);
 
         var respostaMapeada = mapeador.MapearResposta(respostaProvedor, provedorAlvo, solicitacao.CamposResposta, context);
-        if (respostaMapeada is null) 
-            return;
+        
+        LogResultado(solicitacao, provedorAlvo, respostaProvedor, tempoRespostaMs);
         
         context.Response.StatusCode = (int)respostaMapeada.StatusCode;
         mapeador.CopiarHeadersRespostaProvedor(context, respostaMapeada);
@@ -70,5 +72,19 @@ public class BrokerHandler
         var random = new Random();
         var provedorAleatorio = random.Next(provedores.Count);
         return provedores[provedorAleatorio];
+    }
+
+    private void LogResultado(SolicitacaoDto solicitacao, ProvedorSettings provedorAlvo,
+        HttpResponseMessage respostaProvedor, long tempoRespostaMs)
+    {
+        var monitorador = new Monitorador();
+        var logDto = new LogDto
+        {
+            NomeRecurso = solicitacao.Nome, 
+            NomeProvedor = provedorAlvo.Nome,
+            TempoRespostaMs = tempoRespostaMs,
+            Sucesso = respostaProvedor.IsSuccessStatusCode
+        };
+        monitorador.Log(logDto);
     }
 }

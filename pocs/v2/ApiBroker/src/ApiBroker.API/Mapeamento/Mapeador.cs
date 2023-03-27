@@ -95,17 +95,15 @@ public class Mapeador
     /// <param name="camposEsperados">Lista de campos que o cliente espera receber</param>
     /// <param name="requisicaoOriginal">Contexto da requisição feita pelo cliente no Broker</param>
     /// <returns></returns>
-    public HttpResponseMessage? MapearResposta(HttpResponseMessage respostaProvedor, ProvedorSettings provedorAcionado, string[] camposEsperados, HttpContext requisicaoOriginal)
+    public HttpResponseMessage MapearResposta(HttpResponseMessage respostaProvedor, ProvedorSettings provedorAcionado, string[] camposEsperados, HttpContext requisicaoOriginal)
     {
         var conteudoMapeado = SubstituirCamposParaCliente(respostaProvedor, provedorAcionado);
 
         var conteudoFiltrado = FiltrarCampos(conteudoMapeado, camposEsperados);
-        if (conteudoFiltrado is null) 
-            return null;
-        
+
         conteudoFiltrado["provedor"] =  provedorAcionado.Nome;
 
-        return GerarHttpResponseMessage(conteudoFiltrado);
+        return GerarHttpResponseMessage(conteudoFiltrado, respostaProvedor);
     }
 
     private string SubstituirCamposParaCliente(HttpResponseMessage respostaProvedor, ProvedorSettings provedor)
@@ -117,25 +115,31 @@ public class Mapeador
                 campo.Replace(desejado.NomeRecebido, desejado.NomeDesejado));
     }
 
-    private Dictionary<string, string>? FiltrarCampos(string conteudo, string[] camposEsperados)
+    private Dictionary<string, string> FiltrarCampos(string conteudo, string[] camposEsperados)
     {
         var respostaJson = JsonConvert.DeserializeObject<Dictionary<string, string>>(conteudo);
         if (respostaJson is null) 
-            return null;
+            return new Dictionary<string, string>();
 
         return camposEsperados.ToDictionary(
             chave => chave, 
             chave => respostaJson[chave]);
     }
 
-    private HttpResponseMessage GerarHttpResponseMessage(Dictionary<string, string> campos)
+    private HttpResponseMessage GerarHttpResponseMessage(Dictionary<string, string> campos, HttpResponseMessage respostaProvedor)
     {
         var camposString = JsonConvert.SerializeObject(campos);
         var conteudo = new StringContent(camposString, Encoding.UTF8, "application/json");
         
         var resposta = new HttpResponseMessage();
+        foreach (var header in respostaProvedor.Headers)
+        {
+            resposta.Headers.Add(header.Key, header.Value.ToArray());
+        }
+        resposta.StatusCode = respostaProvedor.StatusCode;
+        resposta.ReasonPhrase = respostaProvedor.ReasonPhrase;
         resposta.Content = conteudo;
-        
+
         return resposta;
     }
 
