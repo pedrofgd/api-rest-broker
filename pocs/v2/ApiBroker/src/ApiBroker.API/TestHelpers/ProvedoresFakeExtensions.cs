@@ -9,16 +9,16 @@ public static class ProvedoresFakeExtensions
     {
         // todo: esse provedor espera receber o cep no body como x-www-form-urlencoded
         // todo: é um método POST, mas os demais provedores são GET, então o broker precisa ser ajustado para aceitar um método específico para o provedor 
-        app.MapPost("v1/fake/correios-alt/{cep}", (string cep) =>
+        app.MapPost("v1/fake/correios-alt/{cep}", async (string cep) =>
         {
             var handler = new ProvedoresCepFakeHandler();
-            return handler.CorreiosAltFake(cep);
+            return await handler.CorreiosAltFake(cep);
         });
         
-        app.MapGet("v1/fake/viacep/{cep}", (string cep) =>
+        app.MapGet("v1/fake/viacep/{cep}", async (string cep) =>
         {
             var handler = new ProvedoresCepFakeHandler();
-            return handler.ViaCepFake(cep);
+            return await handler.ViaCepFake(cep);
         });
         
         /*
@@ -27,10 +27,10 @@ public static class ProvedoresFakeExtensions
          * mas o Broker precisa ter algum tipo de função para formatar os parâmetros
          * da requisição
          */
-        app.MapGet("v1/fake/widenet/{cep}", () =>
+        app.MapGet("v1/fake/widenet/{cep}", async () =>
         {
             var handler = new ProvedoresCepFakeHandler();
-            return handler.WideNetFake();
+            return await handler.WideNetFake();
         });
     }
 }

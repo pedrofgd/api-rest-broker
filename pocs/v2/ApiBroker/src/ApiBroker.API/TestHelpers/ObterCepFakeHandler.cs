@@ -6,18 +6,16 @@ namespace ApiBroker.API.TestHelpers;
 /// </summary>
 public class ProvedoresCepFakeHandler
 {
-    public IResult CorreiosAltFake(string cep)
+    public async Task<IResult> CorreiosAltFake(string cep)
     {
+        await ForcarDelay();
+        
         var sla = SomeInt(100);
         if (sla > 90)
             throw new Exception();
         if (sla > 80)
             return Results.BadRequest();
 
-        /*
-         * O Correios retorna um XML, não JSON...
-         * mas só simulando o comporamento
-         */
         var completude = SomeInt(100);
         return Results.Ok(new
         {
@@ -47,8 +45,10 @@ public class ProvedoresCepFakeHandler
         });
     }
 
-    public IResult ViaCepFake(string cep)
+    public async Task<IResult> ViaCepFake(string cep)
     {
+        await ForcarDelay();
+        
         var sla = SomeInt(100);
         if (sla > 90)
             throw new Exception();
@@ -71,8 +71,10 @@ public class ProvedoresCepFakeHandler
         });
     }
 
-    public IResult WideNetFake()
+    public async Task<IResult> WideNetFake()
     {
+        await ForcarDelay();
+        
         var sla = SomeInt(100);
         if (sla > 90)
             throw new Exception();
@@ -93,4 +95,10 @@ public class ProvedoresCepFakeHandler
     private string SomeString() => Guid.NewGuid().ToString();
     private Random Random => new();
     private int SomeInt(int max) => Random.Next(max);
+
+    private async Task ForcarDelay()
+    {
+        var delayMs = SomeInt(500);
+        await Task.Delay(delayMs);
+    }
 }
