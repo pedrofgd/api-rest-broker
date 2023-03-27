@@ -1,7 +1,8 @@
-using System.Net;
+using System.Diagnostics;
 using ApiBroker.API.Configuracoes;
 using ApiBroker.API.Identificacao;
 using ApiBroker.API.Mapeamento;
+using ApiBroker.API.Monitoramento;
 
 namespace ApiBroker.API.Broker;
 
@@ -29,9 +30,11 @@ public class BrokerHandler
         var mapeador = new Mapeador();
         var requisicao = mapeador.MapearRequisicao(context, solicitacao, provedorAlvo);
         
-        var respostaProvedor = await EnviarRequisicaoProvedor(requisicao);
+        var (respostaProvedor, tempoRespostaMs) = await EnviarRequisicaoProvedor(requisicao);
 
         var respostaMapeada = mapeador.MapearResposta(respostaProvedor, provedorAlvo, solicitacao.CamposResposta, context);
+        
+        LogResultado(solicitacao, provedorAlvo, respostaProvedor, tempoRespostaMs);
         
         context.Response.StatusCode = (int)respostaMapeada.StatusCode;
         mapeador.CopiarHeadersRespostaProvedor(context, respostaMapeada);
@@ -69,9 +72,25 @@ public class BrokerHandler
         return provedores[provedorAleatorio];
     }
 
-    private async Task<HttpResponseMessage> EnviarRequisicaoProvedor(HttpRequestMessage requisicao)
+    private async Task<Tuple<HttpResponseMessage, long>> EnviarRequisicaoProvedor(HttpRequestMessage requisicao)
     {
+        var watch = Stopwatch.StartNew();
         var httpClient = new HttpClient();
-        return await httpClient.SendAsync(requisicao);
+        var resultado = await httpClient.SendAsync(requisicao); 
+        return new Tuple<HttpResponseMessage, long>(resultado, watch.ElapsedMilliseconds);
+    }
+
+    private void LogResultado(SolicitacaoDto solicitacao, ProvedorSettings provedorAlvo,
+        HttpResponseMessage respostaProvedor, long tempoRespostaMs)
+    {
+        var monitorador = new Monitorador();
+        var logDto = new LogDto
+        {
+            NomeRecurso = solicitacao.Nome, 
+            NomeProvedor = provedorAlvo.Nome,
+            TempoRespostaMs = tempoRespostaMs,
+            Sucesso = respostaProvedor.IsSuccessStatusCode
+        };
+        monitorador.Log(logDto);
     }
 }
