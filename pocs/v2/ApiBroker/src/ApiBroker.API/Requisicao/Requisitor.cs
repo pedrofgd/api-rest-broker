@@ -1,8 +1,10 @@
+using System.Diagnostics;
+
 namespace ApiBroker.API.Requisicao;
 
 public class Requisitor
 {
-    private async Task<Tuple<HttpResponseMessage, long>> EnviarRequisicaoProvedor(HttpRequestMessage requisicao)
+    public async Task<Tuple<HttpResponseMessage, long>> EnviarRequisicaoProvedor(HttpRequestMessage requisicao)
     {
         var watch = Stopwatch.StartNew();
         var httpClient = new HttpClient();
