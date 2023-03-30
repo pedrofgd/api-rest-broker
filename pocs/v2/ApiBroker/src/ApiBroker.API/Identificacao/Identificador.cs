@@ -21,7 +21,7 @@ public class Identificador
         var infosRequisicao = infoRequisicao.Value.Split("/")[1..];
         
         var nomeRecurso = infosRequisicao[0];
-        var recurso = ObterRecurso(nomeRecurso, configuracoes);
+        var recurso = ConfiguracoesUtils.ObterRecursoPeloNome(nomeRecurso, configuracoes);
         if (recurso is null)
             return null;
 

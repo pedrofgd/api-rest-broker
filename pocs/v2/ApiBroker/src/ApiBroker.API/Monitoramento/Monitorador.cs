@@ -25,6 +25,8 @@ public class Monitorador
             .Field("sucesso", logDto.Sucesso)
             .Timestamp(DateTime.UtcNow, WritePrecision.Ns);
         
+        // todo: avalidar incluir origem da requisição (requisição do cliente ou healthcheck do sistema)
+        
         writeApi.WritePoint(point, "logs", "broker");
     }
 }

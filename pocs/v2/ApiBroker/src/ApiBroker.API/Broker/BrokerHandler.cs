@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using ApiBroker.API.Configuracoes;
 using ApiBroker.API.Identificacao;
 using ApiBroker.API.Mapeamento;
@@ -23,21 +22,22 @@ public class BrokerHandler
         var solicitacao = ObterRecursoSolicitado(context.Request.Path);
         if (solicitacao is null)
             return;
-        
+
         var provedorAlvo = ObterProvedorAlvo(solicitacao.Provedores);
-        if (provedorAlvo is null) 
+        if (provedorAlvo is null)
             return;
-        
+
         var mapeador = new Mapeador();
         var requisicao = mapeador.MapearRequisicao(context, solicitacao, provedorAlvo);
-        
-        var requisitor = new Requisitor();
-        var (respostaProvedor, tempoRespostaMs) = await requisitor.EnviarRequisicaoProvedor(requisicao);
 
-        var respostaMapeada = mapeador.MapearResposta(respostaProvedor, provedorAlvo, solicitacao.CamposResposta, context);
-        
+        var requisitor = new Requisitor();
+        var (respostaProvedor, tempoRespostaMs) = await requisitor.EnviarRequisicao(requisicao);
+
+        var respostaMapeada =
+            mapeador.MapearResposta(respostaProvedor, provedorAlvo, solicitacao.CamposResposta, context);
+
         LogResultado(solicitacao, provedorAlvo, respostaProvedor, tempoRespostaMs);
-        
+
         context.Response.StatusCode = (int)respostaMapeada.StatusCode;
         mapeador.CopiarHeadersRespostaProvedor(context, respostaMapeada);
         await respostaMapeada.Content.CopyToAsync(context.Response.Body);
@@ -65,7 +65,7 @@ public class BrokerHandler
          * todo: pendente de definir e implementar lógica de monitoramento/ranqueamento
          *  Remover o uso do Random() para utilizar o Ranqueador
          */
-        
+
         if (!provedores.Any())
             return null;
 
@@ -80,7 +80,7 @@ public class BrokerHandler
         var monitorador = new Monitorador();
         var logDto = new LogDto
         {
-            NomeRecurso = solicitacao.Nome, 
+            NomeRecurso = solicitacao.Nome,
             NomeProvedor = provedorAlvo.Nome,
             TempoRespostaMs = tempoRespostaMs,
             Sucesso = respostaProvedor.IsSuccessStatusCode
