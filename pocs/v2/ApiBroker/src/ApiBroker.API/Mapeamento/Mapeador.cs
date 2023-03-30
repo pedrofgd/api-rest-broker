@@ -50,6 +50,7 @@ public class Mapeador
 
     private void CopiarHeadersRequisicaoOriginal(HttpContext context, HttpRequestMessage requestMessage)
     {
+        // todo: ajustar para utilizar o método configurado pelo cliente, caso exista
         var metodo = context.Request.Method;
         
         if (!HttpMethods.IsGet(metodo) &&

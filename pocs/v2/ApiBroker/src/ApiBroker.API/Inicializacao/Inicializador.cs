@@ -20,20 +20,25 @@ public class Inicializador
             if (!recurso.Provedores.Any())
                 continue;
 
-            foreach (var provedor in recurso.Provedores)
+            foreach (var provedor in recurso.Provedores.Where(provedor => provedor.Healthcheck != null))
             {
-                _logger.LogInformation("Inicializando {NomeRecurso}/{NomeProvedor}",
+                _logger.LogInformation(
+                    "Inicializando {NomeRecurso}/{NomeProvedor}",
                     recurso.Nome, provedor.Nome);
+                
                 CheckFireAndForget(recurso.Nome, provedor);
             }
         }
     }
 
+    /// <summary>
+    /// Dispara o healthcheck, mas não aguarda a resposta
+    /// </summary>
     private void CheckFireAndForget(string nomeRecurso, ProvedorSettings provedor)
     {
         var healthchecker = new Healthchecker();
 #pragma warning disable CS4014
-        healthchecker.Check(nomeRecurso, provedor);
+        healthchecker.CheckPeriodicamente(nomeRecurso, provedor);
 #pragma warning restore CS4014
     }
 }

@@ -21,11 +21,10 @@ public class Monitorador
         var point = PointData.Measurement("metricas_recursos")
             .Tag("nome_recurso", logDto.NomeRecurso)
             .Tag("nome_provedor", logDto.NomeProvedor)
+            .Tag("origem", logDto.Origem)
             .Field("latencia", logDto.TempoRespostaMs)
-            .Field("sucesso", logDto.Sucesso)
+            .Field("sucesso", logDto.Sucesso) // todo: avaliar enviar como 0 ou 1
             .Timestamp(DateTime.UtcNow, WritePrecision.Ns);
-        
-        // todo: avalidar incluir origem da requisição (requisição do cliente ou healthcheck do sistema)
         
         writeApi.WritePoint(point, "logs", "broker");
     }

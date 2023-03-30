@@ -83,7 +83,8 @@ public class BrokerHandler
             NomeRecurso = solicitacao.Nome,
             NomeProvedor = provedorAlvo.Nome,
             TempoRespostaMs = tempoRespostaMs,
-            Sucesso = respostaProvedor.IsSuccessStatusCode
+            Sucesso = respostaProvedor.IsSuccessStatusCode,
+            Origem = "RequisicaoCliente"
         };
         monitorador.Log(logDto);
     }
