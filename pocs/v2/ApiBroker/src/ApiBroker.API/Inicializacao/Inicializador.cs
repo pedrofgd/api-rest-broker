@@ -6,26 +6,58 @@ namespace ApiBroker.API.Inicializacao;
 public class Inicializador
 {
     private readonly ILogger<Inicializador> _logger;
+    private readonly List<RecursoSettings> _recursos;
 
-    public Inicializador()
+    public Inicializador(IConfiguration configuration)
     {
         _logger = BrokerLoggerFactory.Factory().CreateLogger<Inicializador>();
+        _recursos = ConfiguracoesUtils.ObterTodosRecursos(configuration) ?? throw new ArgumentNullException(nameof(configuration));
     }
 
-    public void Iniciar(IConfiguration configuration)
+    public void Iniciar()
     {
-        var recursos = ConfiguracoesUtils.ObterTodosRecursos(configuration);
-        foreach (var recurso in recursos)
+        try
         {
-            if (!recurso.Provedores.Any())
-                continue;
+            ValidarConfiguracoes();
+        }
+        catch (Exception)
+        {
+            _logger.LogError("Configurações fora do padrão");
+            throw;
+        }
+        
+        CheckProvedores();
+    }
 
+    private void ValidarConfiguracoes()
+    {
+        foreach (var recurso in _recursos)
+        {
+            ArgumentException.ThrowIfNullOrEmpty(recurso.Nome);
+            ArgumentNullException.ThrowIfNull(recurso.Provedores);
+            foreach (var provedor in recurso.Provedores)
+            {
+                ArgumentException.ThrowIfNullOrEmpty(provedor.Nome);
+                ArgumentException.ThrowIfNullOrEmpty(provedor.Rota);
+                ArgumentNullException.ThrowIfNull(provedor.Healthcheck);
+                ArgumentException.ThrowIfNullOrEmpty(provedor.Healthcheck.RotaHealthcheck);
+                ArgumentNullException.ThrowIfNull(provedor.Healthcheck.IntervaloEmSegundos);
+                ArgumentException.ThrowIfNullOrEmpty(provedor.Metodo);
+                ArgumentNullException.ThrowIfNull(provedor.FormatoResposta);
+            }
+        }
+    }
+
+    private void CheckProvedores()
+    {
+        foreach (var recurso in _recursos)
+        {
             foreach (var provedor in recurso.Provedores.Where(provedor => provedor.Healthcheck != null))
             {
                 _logger.LogInformation(
                     "Inicializando {NomeRecurso}/{NomeProvedor}",
                     recurso.Nome, provedor.Nome);
-                
+
                 CheckFireAndForget(recurso.Nome, provedor);
             }
         }

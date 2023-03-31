@@ -44,10 +44,9 @@ public class Healthchecker
         var requisicao = new HttpRequestMessage(metodo, provedor.Healthcheck!.RotaHealthcheck);
         var (resposta, tempoRespostaMs) = await requisitor.EnviarRequisicao(requisicao);
 
-        // todo: utilizar validador quando estiver implementado
-
         LogResultado(nomeRecurso, provedor, resposta, tempoRespostaMs);
 
+        // todo: utilizar validador quando estiver implementado
         var valido = (int)resposta.StatusCode < 500;
         var msg = $"Healthcheck {nomeRecurso}/{provedor.Nome} válido: {valido}";
         if (!valido)

@@ -6,8 +6,8 @@ public static class InicializacaoExtensions
     {
         app.Lifetime.ApplicationStarted.Register(() =>
         {
-            var inicializador = new Inicializador();
-            inicializador.Iniciar(configuration);
+            var inicializador = new Inicializador(configuration);
+            inicializador.Iniciar();
         });
     }
 }

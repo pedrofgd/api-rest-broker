@@ -23,6 +23,8 @@ public class BrokerHandler
         if (solicitacao is null)
             return;
 
+        // todo: colocar while para tentar todos provedores até conseguir uma resposta
+        
         var provedorAlvo = ObterProvedorAlvo(solicitacao.Provedores);
         if (provedorAlvo is null)
             return;
