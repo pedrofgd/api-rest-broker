@@ -1,0 +1,23 @@
+%%{init: {'theme': 'neutral'}}%%
+
+sequenceDiagram
+    participant Cliente
+    participant Broker
+    participant Configuracoes
+    participant Monitorador
+
+    autonumber
+    Cliente->> Monitorador: Inicializa aplicação de monitoramento
+    Cliente->>Broker: "Preenche" arquivo de configuração
+    Cliente->>Broker: Inicializa o Broker
+    Broker->>Configuracoes: Obtém configurações do cliente
+    Configuracoes->>Broker: Configurações
+    Broker->>Broker: Valida configurações
+    alt Configurações inválidas
+        Broker->>Cliente: Erro
+    else Configurações válidas
+        loop Para cada provedor configurado
+            Broker->>Broker: Dispara health check para cada o provedor
+            Broker->> Monitorador: Envia o resultado da validação do health check
+        end
+    end
