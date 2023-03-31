@@ -20,7 +20,7 @@ jobs:
 
     - name: Convert diagrams to PNG
       run: |
-        cd diagrams
+        cd Docs/tccii/diagramas
         for f in *.mmd; do mmdc -i "$f" -o "${f%.mmd}.png" -b transparent; done
 
     - name: Upload PNG files
