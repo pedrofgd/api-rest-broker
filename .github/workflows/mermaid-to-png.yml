@@ -1,6 +1,7 @@
 name: Mermaid Diagrams to PNG
 
 on:
+  workflow_dispatch:
   push:
     paths:
       - 'Docs/tccii/diagramas/**'
