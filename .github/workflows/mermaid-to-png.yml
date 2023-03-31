@@ -1,0 +1,30 @@
+name: Mermaid Diagrams to PNG
+
+on:
+  push:
+    paths:
+      - 'Docs/tccii/diagramas/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y nodejs npm
+        sudo npm install -g mermaid.cli
+
+    - name: Convert diagrams to PNG
+      run: |
+        cd diagrams
+        for f in *.mmd; do mmdc -i "$f" -o "${f%.mmd}.png" -b transparent; done
+
+    - name: Upload PNG files
+      uses: actions/upload-artifact@v2
+      with:
+        name: diagrams
+        path: diagrams/*.png
