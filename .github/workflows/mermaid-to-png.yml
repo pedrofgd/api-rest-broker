@@ -15,7 +15,12 @@ jobs:
 
     - name: Convert diagrams to PNG
       run: |
-        docker run --rm -v "$(pwd)/Docs/tccii/diagramas:/data" minlag/mermaid-cli -i /data -o /data -b transparent
+        for f in Docs/tccii/diagramas/*.mmd; do
+          filename=$(basename "$f")
+          extension="${filename##*.}"
+          filename="${filename%.*}"
+          docker run --rm -v "$(pwd)/Docs/tccii/diagramas:/data" minlag/mermaid-cli -i "/data/$filename.$extension" -o "/data/$filename.png" -b transparent
+        done
 
     - name: Upload PNG files
       uses: actions/upload-artifact@v2
