@@ -2,7 +2,7 @@
 
 ## Cronograma
 
-![Cronograma de pesquisa](https://github.com/pedrofgd/tcc-mack/blob/main/Docs/cronograma_pesquisa.png)
+![Cronograma de pesquisa](https://github.com/pedrofgd/tcc-mack/blob/main/Docs/tcci/cronograma_pesquisa.png)
 
 ## Links
 
