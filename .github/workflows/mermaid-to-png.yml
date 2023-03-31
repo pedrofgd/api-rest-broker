@@ -27,5 +27,5 @@ jobs:
     - name: Upload PNG files
       uses: actions/upload-artifact@v2
       with:
-        name: diagrams
-        path: diagrams/*.png
+        name: diagramas
+        path: Docs/tccii/diagramas/*.png
