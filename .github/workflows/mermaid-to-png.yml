@@ -13,16 +13,9 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Install dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y nodejs npm
-        sudo npm install -g mermaid.cli
-
     - name: Convert diagrams to PNG
       run: |
-        cd Docs/tccii/diagramas
-        for f in *.mmd; do mmdc -i "$f" -o "${f%.mmd}.png" -b transparent; done
+        docker run --rm -v "$(pwd)/Docs/tccii/diagramas:/data" minlag/mermaid-cli -i /data -o /data -b transparent
 
     - name: Upload PNG files
       uses: actions/upload-artifact@v2
