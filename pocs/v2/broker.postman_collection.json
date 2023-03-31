@@ -1,0 +1,292 @@
+{
+	"info": {
+		"_postman_id": "e32c362e-40bf-4213-81f5-b1c7e3bfc55d",
+		"name": "broker",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "15524396"
+	},
+	"item": [
+		{
+			"name": "providers",
+			"item": [
+				{
+					"name": "viacep",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://viacep.com.br/ws/01222020/json",
+							"protocol": "https",
+							"host": [
+								"viacep",
+								"com",
+								"br"
+							],
+							"path": [
+								"ws",
+								"01222020",
+								"json"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "correios ws",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "<?xml version=\"1.0\"?>\n<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:cli=\"http://cliente.bean.master.sigep.bsb.correios.com.br/\">\n    <soapenv:Header />\n    <soapenv:Body>\n        <cli:consultaCEP>\n            <cep>01222020</cep>\n        </cli:consultaCEP>\n    </soapenv:Body>\n</soapenv:Envelope>",
+							"options": {
+								"raw": {
+									"language": "xml"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://apps.correios.com.br/SigepMasterJPA/AtendeClienteService/AtendeCliente",
+							"protocol": "https",
+							"host": [
+								"apps",
+								"correios",
+								"com",
+								"br"
+							],
+							"path": [
+								"SigepMasterJPA",
+								"AtendeClienteService",
+								"AtendeCliente"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "correios alt",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded; charset=UTF-8",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "cep",
+									"value": "01222-020",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "https://buscacepinter.correios.com.br/app/cep/carrega-cep.php",
+							"protocol": "https",
+							"host": [
+								"buscacepinter",
+								"correios",
+								"com",
+								"br"
+							],
+							"path": [
+								"app",
+								"cep",
+								"carrega-cep.php"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "widenet",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://cdn.apicep.com/file/apicep/01222-020.json",
+							"protocol": "https",
+							"host": [
+								"cdn",
+								"apicep",
+								"com"
+							],
+							"path": [
+								"file",
+								"apicep",
+								"01222-020.json"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "net6poc",
+			"item": [
+				{
+					"name": "proxy",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5070/api/cep/12327060",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5070",
+							"path": [
+								"api",
+								"cep",
+								"12327060"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "gopoc",
+			"item": []
+		},
+		{
+			"name": "v2",
+			"item": [
+				{
+					"name": "api/cep/{cep}",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5070/api/cep/01222020",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5070",
+							"path": [
+								"api",
+								"cep",
+								"01222020"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "api/cep-promise/{cep}",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5070/api/cep-promise/01222-020",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5070",
+							"path": [
+								"api",
+								"cep-promise",
+								"01222-020"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "fake/correios-alt",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5070/v1/fake/correios-alt/01222-020",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5070",
+							"path": [
+								"v1",
+								"fake",
+								"correios-alt",
+								"01222-020"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "fake/viacep",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5070/v1/fake/viacep/01222-020",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5070",
+							"path": [
+								"v1",
+								"fake",
+								"viacep",
+								"01222-020"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "fake/widenet",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5070/v1/fake/widenet/01222-020",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5070",
+							"path": [
+								"v1",
+								"fake",
+								"widenet",
+								"01222-020"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5070/healthz",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5070",
+							"path": [
+								"healthz"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
