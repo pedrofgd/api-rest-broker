@@ -92,9 +92,8 @@ public class ProvedoresCepFakeHandler
         });
     }
     
-    private string SomeString() => Guid.NewGuid().ToString();
-    private Random Random => new();
-    private int SomeInt(int max) => Random.Next(max);
+    private string SomeString() => RandomDataUtils.SomeString();
+    private int SomeInt(int max) => RandomDataUtils.SomeInt(max);
 
     private async Task ForcarDelay()
     {
