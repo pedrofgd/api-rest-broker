@@ -7,4 +7,5 @@ public class RecursoSettings
     public string[] ParametrosViaRota { get; set; }
     public string[] CamposResposta { get; set; }
     public List<ProvedorSettings> Provedores { get; set; }
+    public CriteriosSettings Criterios { get; set; }
 }

@@ -59,7 +59,7 @@ public class Mapeador
             !HttpMethods.IsTrace(metodo))
         {
             /*
-             * todo: implementar mapeamento do body da requisição
+             * todo: implementar mapeamento do body da requisição e query params
              *  Por enquanto os testes estão sendo feitos apenas enviando parâmetros via rota
              */
             var streamContent = new StreamContent(context.Request.Body);
@@ -96,15 +96,21 @@ public class Mapeador
     /// <param name="camposEsperados">Lista de campos que o cliente espera receber</param>
     /// <param name="requisicaoOriginal">Contexto da requisição feita pelo cliente no Broker</param>
     /// <returns></returns>
-    public HttpResponseMessage MapearResposta(HttpResponseMessage respostaProvedor, ProvedorSettings provedorAcionado, string[] camposEsperados, HttpContext requisicaoOriginal)
+    public RespostaMapeada MapearResposta(HttpResponseMessage respostaProvedor, ProvedorSettings provedorAcionado, string[] camposEsperados, HttpContext requisicaoOriginal)
     {
         var conteudoMapeado = SubstituirCamposParaCliente(respostaProvedor, provedorAcionado);
 
+        // todo: avaliar incluir parse dos campos também, para tipos especificados pelo cliente
+        
         var conteudoFiltrado = FiltrarCampos(conteudoMapeado, camposEsperados);
 
         conteudoFiltrado["provedor"] =  provedorAcionado.Nome;
 
-        return GerarHttpResponseMessage(conteudoFiltrado, respostaProvedor);
+        return new RespostaMapeada
+        {
+            HttpResponseMessage = GerarHttpResponseMessage(conteudoFiltrado, respostaProvedor),
+            CamposMapeados = conteudoFiltrado
+        };
     }
 
     private string SubstituirCamposParaCliente(HttpResponseMessage respostaProvedor, ProvedorSettings provedor)
