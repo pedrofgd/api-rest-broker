@@ -36,20 +36,9 @@ public class Identificador
             Nome = recurso.Nome,
             Provedores = recurso.Provedores,
             ParametrosRota = parametrosRotaMapeados,
-            CamposResposta = recurso.CamposResposta
+            CamposResposta = recurso.CamposResposta,
+            Criterios = recurso.Criterios
         };
-    }
-
-    /// <summary>
-    /// Obtém as configurações do recurso solicitado
-    /// </summary>
-    /// <param name="nome">Nome configurado para o recurso</param>
-    /// <param name="configuration">Configurações definidas pelo cliente</param>
-    /// <returns>Recurso solicitado se existir</returns>
-    private RecursoSettings? ObterRecurso(string nome, IConfiguration configuration)
-    {
-        var recursos = configuration.GetSection(RecursoSettings.RecursoConfig).Get<List<RecursoSettings>>();
-        return recursos?.FirstOrDefault(r => r.Nome == nome);
     }
 
     private Dictionary<string, string>? ObterParametrosRota(IReadOnlyList<string> nomesParametrosRota, IReadOnlyList<string> valoresParametrosRota)

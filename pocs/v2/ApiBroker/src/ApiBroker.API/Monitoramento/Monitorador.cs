@@ -26,6 +26,12 @@ public class Monitorador
             .Field("sucesso", logDto.Sucesso) // todo: avaliar enviar como 0 ou 1
             .Timestamp(DateTime.UtcNow, WritePrecision.Ns);
         
+        /*
+         * todo: timeout aqui está passando batido...
+         *  Quando o servidor do InfluxDB não está rodando, a aplicação tenta
+         *  por alguns segundos e depois segue a execução, mesmo que não tenha gravado.
+         *  Ver como lidar com erros e timeout
+         */
         writeApi.WritePoint(point, "logs", "broker");
     }
 }

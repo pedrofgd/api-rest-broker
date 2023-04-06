@@ -3,6 +3,7 @@ using ApiBroker.API.Identificacao;
 using ApiBroker.API.Mapeamento;
 using ApiBroker.API.Requisicao;
 using ApiBroker.API.Monitoramento;
+using ApiBroker.API.Validacao;
 
 namespace ApiBroker.API.Broker;
 
@@ -17,32 +18,44 @@ public class BrokerHandler
         _configuration = configuration;
     }
 
+    /// <summary>
+    /// Método invocado para manipular a requisição quando
+    /// o cliente chama o Broker no endpoint configurado
+    /// </summary>
+    /// <param name="context">Contexto da requisição</param>
     public async Task Invoke(HttpContext context)
     {
         var solicitacao = ObterRecursoSolicitado(context.Request.Path);
         if (solicitacao is null)
             return;
 
-        // todo: colocar while para tentar todos provedores até conseguir uma resposta
-        
-        var provedorAlvo = ObterProvedorAlvo(solicitacao.Provedores);
-        if (provedorAlvo is null)
-            return;
-
         var mapeador = new Mapeador();
-        var requisicao = mapeador.MapearRequisicao(context, solicitacao, provedorAlvo);
+        RespostaMapeada respostaMapeada = new();
+        
+        var resultadoValido = false;
+        while (!resultadoValido)
+        {
+            var provedorAlvo = ObterProvedorAlvo(solicitacao.Provedores);
+            if (provedorAlvo is null)
+                return;
+            // todo: validar se todos os provedores já foram chamados
 
-        var requisitor = new Requisitor();
-        var (respostaProvedor, tempoRespostaMs) = await requisitor.EnviarRequisicao(requisicao);
+            var requisicao = mapeador.MapearRequisicao(context, solicitacao, provedorAlvo);
 
-        var respostaMapeada =
-            mapeador.MapearResposta(respostaProvedor, provedorAlvo, solicitacao.CamposResposta, context);
+            var requisitor = new Requisitor();
+            var (respostaProvedor, tempoRespostaMs) = await requisitor.EnviarRequisicao(requisicao);
 
-        LogResultado(solicitacao, provedorAlvo, respostaProvedor, tempoRespostaMs);
+            respostaMapeada = mapeador.MapearResposta(respostaProvedor, provedorAlvo, solicitacao.CamposResposta, context);
 
-        context.Response.StatusCode = (int)respostaMapeada.StatusCode;
-        mapeador.CopiarHeadersRespostaProvedor(context, respostaMapeada);
-        await respostaMapeada.Content.CopyToAsync(context.Response.Body);
+            LogResultado(solicitacao, provedorAlvo, respostaProvedor, tempoRespostaMs);
+
+            var validador = new Validador(solicitacao);
+            resultadoValido = validador.Validar(respostaMapeada);
+        }
+        
+        context.Response.StatusCode = (int)respostaMapeada.HttpResponseMessage.StatusCode;
+        mapeador.CopiarHeadersRespostaProvedor(context, respostaMapeada.HttpResponseMessage);
+        await respostaMapeada.HttpResponseMessage.Content.CopyToAsync(context.Response.Body);
     }
 
     /// <summary>
