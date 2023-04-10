@@ -14,6 +14,8 @@ public class Monitorador
  
     public void Log(LogDto logDto)
     {
+        // todo: ajustar para utilizar o InfluxDbClientFactory
+        
         // todo: url do Influx como variável ambiente
         using var influx = new InfluxDBClient("http://localhost:8086", Token);
         using var writeApi = influx.GetWriteApi();
@@ -23,8 +25,8 @@ public class Monitorador
             .Tag("nome_provedor", logDto.NomeProvedor)
             .Tag("origem", logDto.Origem)
             .Field("latencia", logDto.TempoRespostaMs)
-            .Field("sucesso", logDto.Sucesso) // todo: avaliar enviar como 0 ou 1
-            .Timestamp(DateTime.UtcNow, WritePrecision.Ns);
+            .Field("sucesso", logDto.Sucesso ? 1 : 0)
+            .Timestamp(DateTime.UtcNow, WritePrecision.Ms);
         
         /*
          * todo: timeout aqui está passando batido...

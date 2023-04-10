@@ -3,6 +3,7 @@ using ApiBroker.API.Identificacao;
 using ApiBroker.API.Mapeamento;
 using ApiBroker.API.Requisicao;
 using ApiBroker.API.Monitoramento;
+using ApiBroker.API.Ranqueamento;
 using ApiBroker.API.Validacao;
 
 namespace ApiBroker.API.Broker;
@@ -11,11 +12,13 @@ public class BrokerHandler
 {
     private readonly RequestDelegate _next;
     private readonly IConfiguration _configuration;
+    private readonly ILogger<BrokerHandler> _logger;
 
     public BrokerHandler(RequestDelegate next, IConfiguration configuration)
     {
         _next = next;
         _configuration = configuration;
+        _logger = BrokerLoggerFactory.Factory().CreateLogger<BrokerHandler>();
     }
 
     /// <summary>
@@ -31,14 +34,13 @@ public class BrokerHandler
 
         var mapeador = new Mapeador();
         RespostaMapeada respostaMapeada = new();
-        
-        var resultadoValido = false;
-        while (!resultadoValido)
+
+        var listaProvedores = await ObterOrdemMelhoresProvedores(solicitacao.Nome);
+        foreach (var provedor in listaProvedores)
         {
-            var provedorAlvo = ObterProvedorAlvo(solicitacao.Provedores);
+            var provedorAlvo = ObterDadosProvedorAlvo(solicitacao.Nome, provedor);
             if (provedorAlvo is null)
                 return;
-            // todo: validar se todos os provedores já foram chamados
 
             var requisicao = mapeador.MapearRequisicao(context, solicitacao, provedorAlvo);
 
@@ -50,7 +52,11 @@ public class BrokerHandler
             LogResultado(solicitacao, provedorAlvo, respostaProvedor, tempoRespostaMs);
 
             var validador = new Validador(solicitacao);
-            resultadoValido = validador.Validar(respostaMapeada);
+            var resultadoValido = validador.Validar(respostaMapeada);
+            if (resultadoValido) break;
+            
+            // todo: debug
+            _logger.LogWarning("Tentando próximo provedor da lista...");
         }
         
         context.Response.StatusCode = (int)respostaMapeada.HttpResponseMessage.StatusCode;
@@ -69,24 +75,21 @@ public class BrokerHandler
         return identificador.IdentificarRecursoSolicitado(rota, _configuration);
     }
 
+    private async Task<List<string>> ObterOrdemMelhoresProvedores(string nomeRecurso)
+    {
+        var ranqueador = new Ranqueador();
+        return await ranqueador.ObterOrdemMelhoresProvedores(nomeRecurso);
+    }
+
     /// <summary>
     /// Obtém o provedor mais disponível para atender a requisição do cliente
     /// </summary>
-    /// <param name="provedores">Lista de provedores configurada para o recurso</param>
+    /// <param name="nomeRecurso">Nome do recurso solicitado pelo cliente</param>
+    /// <param name="nomeProvedor">Nome do provedor alvo</param>
     /// <returns>Configurações do provedor mais disponível</returns>
-    private ProvedorSettings? ObterProvedorAlvo(IReadOnlyList<ProvedorSettings> provedores)
+    private ProvedorSettings? ObterDadosProvedorAlvo(string nomeRecurso, string nomeProvedor)
     {
-        /*
-         * todo: pendente de definir e implementar lógica de monitoramento/ranqueamento
-         *  Remover o uso do Random() para utilizar o Ranqueador
-         */
-
-        if (!provedores.Any())
-            return null;
-
-        var random = new Random();
-        var provedorAleatorio = random.Next(provedores.Count);
-        return provedores[provedorAleatorio];
+        return ConfiguracoesUtils.ObterDadosProvedorRecurso(nomeRecurso, nomeProvedor, _configuration);
     }
 
     private void LogResultado(SolicitacaoDto solicitacao, ProvedorSettings provedorAlvo,
