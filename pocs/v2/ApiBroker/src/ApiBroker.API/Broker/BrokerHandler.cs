@@ -35,7 +35,7 @@ public class BrokerHandler
         var mapeador = new Mapeador();
         RespostaMapeada respostaMapeada = new();
 
-        var listaProvedores = await ObterOrdemMelhoresProvedores(solicitacao.Nome);
+        var listaProvedores = await ObterOrdemMelhoresProvedores(solicitacao);
         foreach (var provedor in listaProvedores)
         {
             var provedorAlvo = ObterDadosProvedorAlvo(solicitacao.Nome, provedor);
@@ -75,10 +75,10 @@ public class BrokerHandler
         return identificador.IdentificarRecursoSolicitado(rota, _configuration);
     }
 
-    private async Task<List<string>> ObterOrdemMelhoresProvedores(string nomeRecurso)
+    private async Task<List<string>> ObterOrdemMelhoresProvedores(SolicitacaoDto solicitacao)
     {
         var ranqueador = new Ranqueador();
-        return await ranqueador.ObterOrdemMelhoresProvedores(nomeRecurso);
+        return await ranqueador.ObterOrdemMelhoresProvedores(solicitacao);
     }
 
     /// <summary>
