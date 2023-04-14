@@ -26,3 +26,9 @@ jobs:
           for f in Docs/tccii/cloud/*.drawio; do
             drawio -x -f png -o "$(pwd)/Docs/tccii/cloud/f" "$(pwd)/Docs/tccii/cloud/$filename"
           done
+          
+      - name: Upload PNG files
+        uses: actions/upload-artifact@v2
+        with:
+          name: diagramas
+          path: Docs/tccii/cloud/*.png
