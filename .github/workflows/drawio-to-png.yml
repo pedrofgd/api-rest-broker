@@ -1,0 +1,28 @@
+name: Draw.io Diagrams to PNG
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'Docs/tccii/cloud/**'
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      
+      - name: Install Java
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+          
+      - name: Install Draw.io CLI
+        run: npm install -g @drawio/cli
+        
+      - name: Convert diagrams to PNG
+        run: |
+          for f in Docs/tccii/cloud/*.drawio; do
+            drawio -x -f png -o "$(pwd)/Docs/tccii/cloud/f" "$(pwd)/Docs/tccii/cloud/$filename"
+          done
