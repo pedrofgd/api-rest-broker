@@ -1,6 +1,6 @@
 using ApiBroker.API.Configuracoes;
 
-namespace ApiBroker.API.Identificacao;
+namespace ApiBroker.API.Broker;
 
 public class Identificador
 {
@@ -37,7 +37,8 @@ public class Identificador
             Provedores = recurso.Provedores,
             ParametrosRota = parametrosRotaMapeados,
             CamposResposta = recurso.CamposResposta,
-            Criterios = recurso.Criterios
+            Criterios = recurso.Criterios,
+            TentarTodosProvedoresAteSucesso = recurso.TentarTodosProvedoresAteSucesso
         };
     }
 
