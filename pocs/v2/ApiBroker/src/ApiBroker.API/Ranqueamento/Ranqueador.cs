@@ -23,8 +23,8 @@ public class Ranqueador
 
     private async Task<List<Dictionary<string, object>>> ObterTodosProvedores(string nomeRecurso)
     {
-        var monitorador = new MetricasDao();
-        return await monitorador.ObterDadosProvedores(nomeRecurso);
+        var metricasDao = new MetricasDao();
+        return await metricasDao.ObterDadosProvedores(nomeRecurso);
     }
 
 }

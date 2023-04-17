@@ -1,4 +1,5 @@
 using ApiBroker.API.Configuracoes;
+// ReSharper disable PropertyCanBeMadeInitOnly.Global
 
 namespace ApiBroker.API.Broker;
 

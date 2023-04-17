@@ -10,7 +10,7 @@ public class Identificador
     /// <param name="rota">Rota da requisição que o cliente fez no Broker</param>
     /// <param name="configuracoes">Configurações definidas pelo cliente</param>
     /// <returns>Recurso solicitado pelo cliente</returns>
-    public SolicitacaoDto? IdentificarRecursoSolicitado(PathString rota, IConfiguration configuracoes)
+    public SolicitacaoDto IdentificarRecursoSolicitado(PathString rota, IConfiguration configuracoes)
     {
         if (!rota.StartsWithSegments("/api", out var infoRequisicao))
             return null;
@@ -42,7 +42,7 @@ public class Identificador
         };
     }
 
-    private Dictionary<string, string>? ObterParametrosRota(IReadOnlyList<string> nomesParametrosRota, IReadOnlyList<string> valoresParametrosRota)
+    private Dictionary<string, string> ObterParametrosRota(IReadOnlyList<string> nomesParametrosRota, IReadOnlyList<string> valoresParametrosRota)
     {
         if (nomesParametrosRota.Count != valoresParametrosRota.Count)
             return null;

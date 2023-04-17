@@ -24,7 +24,7 @@ public static class ConfiguracoesUtils
     /// <param name="nome">Nome configurado para o recurso</param>
     /// <param name="configuration">Configurações definidas pelo cliente</param>
     /// <returns>Recurso solicitado se existir</returns>
-    public static RecursoSettings? ObterRecursoPeloNome(string nome, IConfiguration configuration)
+    public static RecursoSettings ObterRecursoPeloNome(string nome, IConfiguration configuration)
     {
         var recursos = configuration.GetSection(RecursoSettings.RecursoConfig)
             .Get<List<RecursoSettings>>();
@@ -39,7 +39,7 @@ public static class ConfiguracoesUtils
     /// <param name="nomeProvedor">Nome configurado para o provedor</param>
     /// <param name="configuration">Configurações definidas pelo cliente</param>
     /// <returns></returns>
-    public static ProvedorSettings? ObterDadosProvedorRecurso(string nomeRecurso, string nomeProvedor, IConfiguration configuration)
+    public static ProvedorSettings ObterDadosProvedorRecurso(string nomeRecurso, string nomeProvedor, IConfiguration configuration)
     {
         var recursos = configuration.GetSection(RecursoSettings.RecursoConfig)
             .Get<List<RecursoSettings>>();

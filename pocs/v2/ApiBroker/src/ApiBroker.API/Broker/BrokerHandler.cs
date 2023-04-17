@@ -64,7 +64,7 @@ public class BrokerHandler
     /// </summary>
     /// <param name="rota">Rota da requisição recebida</param>
     /// <returns>Configurações do recurso solicitado</returns>
-    private SolicitacaoDto? ObterRecursoSolicitado(PathString rota)
+    private SolicitacaoDto ObterRecursoSolicitado(PathString rota)
     {
         var identificador = new Identificador();
         return identificador.IdentificarRecursoSolicitado(rota, _configuration);
@@ -86,7 +86,7 @@ public class BrokerHandler
     /// <param name="nomeRecurso">Nome do recurso solicitado pelo cliente</param>
     /// <param name="nomeProvedor">Nome do provedor alvo</param>
     /// <returns>Configurações do provedor mais disponível</returns>
-    private ProvedorSettings? ObterDadosProvedorAlvo(string nomeRecurso, string nomeProvedor)
+    private ProvedorSettings ObterDadosProvedorAlvo(string nomeRecurso, string nomeProvedor)
     {
         return ConfiguracoesUtils.ObterDadosProvedorRecurso(nomeRecurso, nomeProvedor, _configuration);
     }

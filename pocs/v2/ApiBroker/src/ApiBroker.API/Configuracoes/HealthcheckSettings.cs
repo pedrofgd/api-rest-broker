@@ -1,3 +1,4 @@
+// ReSharper disable UnusedAutoPropertyAccessor.Global
 namespace ApiBroker.API.Configuracoes;
 
 public class HealthcheckSettings
