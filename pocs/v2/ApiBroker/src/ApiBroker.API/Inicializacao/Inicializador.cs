@@ -43,7 +43,6 @@ public class Inicializador
                 ArgumentNullException.ThrowIfNull(provedor.Healthcheck);
                 ArgumentException.ThrowIfNullOrEmpty(provedor.Healthcheck.RotaHealthcheck);
                 ArgumentNullException.ThrowIfNull(provedor.Healthcheck.IntervaloEmSegundos);
-                ArgumentException.ThrowIfNullOrEmpty(provedor.Metodo);
                 ArgumentNullException.ThrowIfNull(provedor.FormatoResposta);
             }
         }

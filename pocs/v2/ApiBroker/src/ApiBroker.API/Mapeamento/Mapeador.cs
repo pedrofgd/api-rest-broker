@@ -20,7 +20,7 @@ public class Mapeador
     public HttpRequestMessage MapearRequisicao(HttpContext contextoOriginal, SolicitacaoDto solicitacao, ProvedorSettings provedorAlvo)
     {
         var uri = CriarUriAlvo(provedorAlvo.Rota, solicitacao.ParametrosRota);
-        return CriarRequisicao(contextoOriginal, uri);
+        return CriarRequisicao(contextoOriginal, uri, provedorAlvo);
     }
 
     private Uri CriarUriAlvo(string rota, Dictionary<string, string> parametrosRota)
@@ -37,14 +37,14 @@ public class Mapeador
         return rota;
     }
     
-    private HttpRequestMessage CriarRequisicao(HttpContext contextoOriginal, Uri uriAlvo)
+    private HttpRequestMessage CriarRequisicao(HttpContext contextoOriginal, Uri uriAlvo, ProvedorSettings provedorSettings)
     {
         var requisicao = new HttpRequestMessage();
         CopiarHeadersRequisicaoOriginal(contextoOriginal, requisicao);
 
         requisicao.RequestUri = uriAlvo;
         requisicao.Headers.Host = uriAlvo.Host;
-        requisicao.Method = ObterMetodoHttp(contextoOriginal.Request.Method);
+        requisicao.Method = ObterMetodoHttp(provedorSettings.Metodo ?? contextoOriginal.Request.Method);
 
         return requisicao;
     }
