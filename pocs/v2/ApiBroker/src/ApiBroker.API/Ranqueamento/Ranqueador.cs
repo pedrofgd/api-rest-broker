@@ -33,7 +33,7 @@ public class Ranqueador
             {
                 { "name", fluxRecord.GetValueByKey("provider") },
                 { "response_time", Convert.ToDouble(fluxRecord.GetValueByKey("mean_latency")) },
-                { "error_rate", Convert.ToDouble(fluxRecord.GetValueByKey("error_count")) }
+                { "error_rate", Convert.ToInt32(fluxRecord.GetValueByKey("error_count")) }
             }).ToList();
 
         return providers;
@@ -55,12 +55,12 @@ public class Ranqueador
             $"       |> filter(fn: (r) => r[\"nome_recurso\"] == \"{nomeRecurso}\")\n" +
             "        |> filter(fn: (r) => r[\"_field\"] == \"latencia\")\n" +
             "        |> mean()\n" +
-            "    errorCount = from(bucket: \"logs-alt\")\n" +
+            "    errorCount = from(bucket: \"logs\")\n" +
             "        |> range(start: -1h)\n" +
             "        |> filter(fn: (r) => r[\"_measurement\"] == \"metricas_recursos\")\n" +
             "        |> filter(fn: (r) => r[\"_field\"] == \"sucesso\")\n" +
             $"       |> filter(fn: (r) => r[\"nome_recurso\"] == \"{nomeRecurso}\")\n" +
-            "        |> filter(fn: (r) => r[\"_value\"] == 0)\n" +
+            "        |> filter(fn: (r) => r[\"_value\"] == 0, onEmpty: \"keep\")\n" +
             "        |> count()\n" +
             "    return join(tables: {meanLatency: meanLatency, errorCount: errorCount}, on: [\"nome_provedor\"])\n" +
             "        |> map(fn: (r) => ({provider: r.nome_provedor, mean_latency: r._value_meanLatency, " +
