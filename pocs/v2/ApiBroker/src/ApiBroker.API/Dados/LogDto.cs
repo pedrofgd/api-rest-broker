@@ -1,4 +1,4 @@
-namespace ApiBroker.API.Monitoramento;
+namespace ApiBroker.API.Dados;
 
 public class LogDto
 {

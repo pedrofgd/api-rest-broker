@@ -1,6 +1,6 @@
 using InfluxDB.Client;
 
-namespace ApiBroker.API;
+namespace ApiBroker.API.Dados;
 
 public class InfluxDbClientFactory
 {

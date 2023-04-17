@@ -1,6 +1,6 @@
 using ApiBroker.API.Configuracoes;
-using ApiBroker.API.Monitoramento;
 using ApiBroker.API.Requisicao;
+using ApiBroker.API.Dados;
 
 namespace ApiBroker.API.Healthcheck;
 
@@ -58,7 +58,7 @@ public class Healthchecker
     private void LogResultado(string nomeRecurso, ProvedorSettings provedor,
         HttpResponseMessage resultadoCheck, long tempoRespostaMs)
     {
-        var monitorador = new Monitorador();
+        var monitorador = new MetricasDao();
         var logDto = new LogDto
         {
             NomeRecurso = nomeRecurso,
