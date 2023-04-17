@@ -31,4 +31,20 @@ public static class ConfiguracoesUtils
         
         return recursos?.FirstOrDefault(r => r.Nome == nome);
     }
+
+    /// <summary>
+    /// Obtém as configurações do provedor solicitado
+    /// </summary>
+    /// <param name="nomeRecurso">Nome do recurso a qual o provedor atende</param>
+    /// <param name="nomeProvedor">Nome configurado para o provedor</param>
+    /// <param name="configuration">Configurações definidas pelo cliente</param>
+    /// <returns></returns>
+    public static ProvedorSettings? ObterDadosProvedorRecurso(string nomeRecurso, string nomeProvedor, IConfiguration configuration)
+    {
+        var recursos = configuration.GetSection(RecursoSettings.RecursoConfig)
+            .Get<List<RecursoSettings>>();
+        
+        var recurso = recursos?.FirstOrDefault(r => r.Nome == nomeRecurso);
+        return recurso?.Provedores.FirstOrDefault(provedor => provedor.Nome == nomeProvedor);
+    }
 }

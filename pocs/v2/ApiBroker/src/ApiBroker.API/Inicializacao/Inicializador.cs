@@ -14,7 +14,7 @@ public class Inicializador
         _recursos = ConfiguracoesUtils.ObterTodosRecursos(configuration) ?? throw new ArgumentNullException(nameof(configuration));
     }
 
-    public void Iniciar()
+    public void Iniciar(bool check)
     {
         try
         {
@@ -26,7 +26,8 @@ public class Inicializador
             throw;
         }
         
-        CheckProvedores();
+        if (check)
+            CheckProvedores();
     }
 
     private void ValidarConfiguracoes()
