@@ -1,3 +1,4 @@
+// ReSharper disable UnusedAutoPropertyAccessor.Global
 namespace ApiBroker.API.Configuracoes;
 
 public class RecursoSettings
@@ -8,4 +9,5 @@ public class RecursoSettings
     public string[] CamposResposta { get; set; }
     public List<ProvedorSettings> Provedores { get; set; }
     public CriteriosSettings Criterios { get; set; }
+    public bool TentarTodosProvedoresAteSucesso { get; set; }
 }

@@ -1,5 +1,4 @@
 using ApiBroker.API.Configuracoes;
-using ApiBroker.API.Identificacao;
 using ApiBroker.API.Mapeamento;
 using ApiBroker.API.Requisicao;
 using ApiBroker.API.Dados;
@@ -36,9 +35,8 @@ public class BrokerHandler
         RespostaMapeada respostaMapeada = new();
 
         var listaProvedores = await ObterOrdemMelhoresProvedores(solicitacao);
-        foreach (var provedor in listaProvedores)
+        foreach (var provedorAlvo in listaProvedores.Select(provedor => ObterDadosProvedorAlvo(solicitacao.Nome, provedor)))
         {
-            var provedorAlvo = ObterDadosProvedorAlvo(solicitacao.Nome, provedor);
             if (provedorAlvo is null)
                 return;
 
@@ -54,9 +52,6 @@ public class BrokerHandler
             var validador = new Validador(solicitacao);
             var resultadoValido = validador.Validar(respostaMapeada);
             if (resultadoValido) break;
-            
-            // todo: debug
-            _logger.LogWarning("Tentando próximo provedor da lista...");
         }
         
         context.Response.StatusCode = (int)respostaMapeada.HttpResponseMessage.StatusCode;
@@ -69,7 +64,7 @@ public class BrokerHandler
     /// </summary>
     /// <param name="rota">Rota da requisição recebida</param>
     /// <returns>Configurações do recurso solicitado</returns>
-    private SolicitacaoDto? ObterRecursoSolicitado(PathString rota)
+    private SolicitacaoDto ObterRecursoSolicitado(PathString rota)
     {
         var identificador = new Identificador();
         return identificador.IdentificarRecursoSolicitado(rota, _configuration);
@@ -78,7 +73,11 @@ public class BrokerHandler
     private async Task<List<string>> ObterOrdemMelhoresProvedores(SolicitacaoDto solicitacao)
     {
         var ranqueador = new Ranqueador();
-        return await ranqueador.ObterOrdemMelhoresProvedores(solicitacao);
+        var todosProvedoresDisponiveis =  await ranqueador.ObterOrdemMelhoresProvedores(solicitacao);
+
+        return solicitacao.TentarTodosProvedoresAteSucesso
+            ? todosProvedoresDisponiveis
+            : todosProvedoresDisponiveis.Take(1).ToList();
     }
 
     /// <summary>
@@ -87,7 +86,7 @@ public class BrokerHandler
     /// <param name="nomeRecurso">Nome do recurso solicitado pelo cliente</param>
     /// <param name="nomeProvedor">Nome do provedor alvo</param>
     /// <returns>Configurações do provedor mais disponível</returns>
-    private ProvedorSettings? ObterDadosProvedorAlvo(string nomeRecurso, string nomeProvedor)
+    private ProvedorSettings ObterDadosProvedorAlvo(string nomeRecurso, string nomeProvedor)
     {
         return ConfiguracoesUtils.ObterDadosProvedorRecurso(nomeRecurso, nomeProvedor, _configuration);
     }

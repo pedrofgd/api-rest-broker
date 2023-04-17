@@ -17,7 +17,7 @@ public class MetricasDao
             .Field("latencia", logDto.TempoRespostaMs)
             .Field("sucesso", logDto.Sucesso ? 1 : 0)
             .Timestamp(DateTime.UtcNow, WritePrecision.Ms);
-        
+
 #pragma warning disable CS4014
         writeApi.WritePointAsync(point, "logs", "broker");
 #pragma warning disable CS4014
@@ -26,28 +26,27 @@ public class MetricasDao
     public async Task<List<Dictionary<string, object>>> ObterDadosProvedores(String nomeRecurso)
     {
         using var influx = InfluxDbClientFactory.OpenConnection();
-        var queryApi = influx.GetQueryApi(); 
+        var queryApi = influx.GetQueryApi();
+        
         var fluxTables = await queryApi.QueryAsync(Query(nomeRecurso), "broker");
-        var providers = (from fluxTable in fluxTables
-             from fluxRecord in fluxTable.Records
-             select new Dictionary<string, object>
-             {
-                 { "name", fluxRecord.GetValueByKey("provider") },
-                 { "response_time", Convert.ToDouble(fluxRecord.GetValueByKey("mean_latency")) },
-                 { "error_rate", Convert.ToInt32(fluxRecord.GetValueByKey("error_count")) }
-             }).ToList();
+        
+        var providers = (
+            from fluxTable in fluxTables
+            from fluxRecord in fluxTable.Records
+            select new Dictionary<string, object>
+            {
+                { "name", fluxRecord.GetValueByKey("provider") },
+                { "response_time", Convert.ToDouble(fluxRecord.GetValueByKey("mean_latency")) },
+                { "error_rate", Convert.ToInt32(fluxRecord.GetValueByKey("error_count")) }
+            }).ToList();
+        
         return providers;
     }
-    
+
     private static string Query(string nomeRecurso)
     {
-        /*
-         * todo: rever range na consulta (talvez ser parte da configuração do cliente)
-         * todo: utilizando "logs-alt" por enquanto, mudar para "logs"
-         *  Ajustar script para marcar errorCount como 0 caso a consulta não encontre
-         *  nenhum registro em que sucesso._value = 0
-         */
-        return 
+        // todo: rever range na consulta (talvez ser parte da configuração do cliente)
+        return
             "ranking = () => {\n" +
             "    meanLatency = from(bucket: \"logs\")\n" +
             "        |> range(start: -1h)\n" +
@@ -70,5 +69,4 @@ public class MetricasDao
             "}\n" +
             "ranking()";
     }
-
 }
