@@ -115,7 +115,10 @@ public class Mapeador
     {
         var respostaString = respostaProvedor.Content.ReadAsStringAsync().Result;
     
-        var json = JsonDocument.Parse(respostaString).RootElement;
+        var json = ParseJson(respostaString);
+        if (json is null)
+            // todo: incluir mensagem de erro nas próximas versões
+            return new Dictionary<string, string>();
 
         var campos = new Dictionary<string, string>();
 
@@ -128,12 +131,25 @@ public class Mapeador
             
             var prop = json;
             foreach (var s in path)
-                prop = prop.GetProperty(s);
+                prop = prop.Value.GetProperty(s);
 
-            campos.Add(formato?.NomeDesejado ?? campoEsperado, prop.GetString());
+            campos.Add(formato?.NomeDesejado ?? campoEsperado, prop.Value.GetString());
         }
 
         return campos;
+    }
+
+    private JsonElement? ParseJson(string resposta)
+    {
+        try
+        {
+            return JsonDocument.Parse(resposta).RootElement;
+        }
+        catch (Exception)
+        {
+            // todo: incluir log
+            return null;
+        }
     }
 
     private HttpResponseMessage GerarHttpResponseMessage(Dictionary<string, string> campos, HttpResponseMessage respostaProvedor)
