@@ -45,7 +45,7 @@ public class BrokerHandler
             var requisitor = new Requisitor();
             var (respostaProvedor, tempoRespostaMs) = await requisitor.EnviarRequisicao(requisicao);
 
-            respostaMapeada = mapeador.MapearResposta(respostaProvedor, provedorAlvo, solicitacao.CamposResposta, context);
+            respostaMapeada = mapeador.MapearResposta(respostaProvedor, provedorAlvo, solicitacao.CamposResposta);
 
             LogResultado(solicitacao, provedorAlvo, respostaProvedor, tempoRespostaMs);
 
