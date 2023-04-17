@@ -12,7 +12,7 @@ var app = builder.Build();
 
 app.UseBroker();
 // todo: check desabilitado durante os testes
-app.UseInicializador(configuration, false);
+app.UseInicializador(configuration, true);
 
 // Para testes na PoC
 app.UseProvedoresFake();

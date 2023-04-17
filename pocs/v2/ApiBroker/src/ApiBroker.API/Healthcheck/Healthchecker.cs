@@ -10,7 +10,7 @@ public class Healthchecker
 
     public Healthchecker()
     {
-        _logger = BrokerLoggerFactory.Factory().CreateLogger<Healthchecker>();
+        _logger = LoggerFactory.Factory().CreateLogger<Healthchecker>();
     }
 
     /// <summary>

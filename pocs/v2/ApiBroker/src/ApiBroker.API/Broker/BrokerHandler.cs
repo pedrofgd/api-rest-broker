@@ -18,7 +18,7 @@ public class BrokerHandler
     {
         _next = next;
         _configuration = configuration;
-        _logger = BrokerLoggerFactory.Factory().CreateLogger<BrokerHandler>();
+        _logger = LoggerFactory.Factory().CreateLogger<BrokerHandler>();
     }
 
     /// <summary>
