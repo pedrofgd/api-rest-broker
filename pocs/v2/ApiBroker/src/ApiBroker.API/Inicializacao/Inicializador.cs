@@ -10,7 +10,7 @@ public class Inicializador
 
     public Inicializador(IConfiguration configuration)
     {
-        _logger = BrokerLoggerFactory.Factory().CreateLogger<Inicializador>();
+        _logger = LoggerFactory.Factory().CreateLogger<Inicializador>();
         _recursos = ConfiguracoesUtils.ObterTodosRecursos(configuration) ?? throw new ArgumentNullException(nameof(configuration));
     }
 

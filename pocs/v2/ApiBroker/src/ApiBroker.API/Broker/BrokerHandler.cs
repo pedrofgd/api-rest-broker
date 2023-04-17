@@ -2,7 +2,7 @@ using ApiBroker.API.Configuracoes;
 using ApiBroker.API.Identificacao;
 using ApiBroker.API.Mapeamento;
 using ApiBroker.API.Requisicao;
-using ApiBroker.API.Monitoramento;
+using ApiBroker.API.Dados;
 using ApiBroker.API.Ranqueamento;
 using ApiBroker.API.Validacao;
 
@@ -18,7 +18,7 @@ public class BrokerHandler
     {
         _next = next;
         _configuration = configuration;
-        _logger = BrokerLoggerFactory.Factory().CreateLogger<BrokerHandler>();
+        _logger = LoggerFactory.Factory().CreateLogger<BrokerHandler>();
     }
 
     /// <summary>
@@ -95,7 +95,7 @@ public class BrokerHandler
     private void LogResultado(SolicitacaoDto solicitacao, ProvedorSettings provedorAlvo,
         HttpResponseMessage respostaProvedor, long tempoRespostaMs)
     {
-        var monitorador = new Monitorador();
+        var monitorador = new MetricasDao();
         var logDto = new LogDto
         {
             NomeRecurso = solicitacao.Nome,
