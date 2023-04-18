@@ -1,3 +1,4 @@
+using System.Net;
 using ApiBroker.API.Configuracoes;
 using ApiBroker.API.Mapeamento;
 using ApiBroker.API.Requisicao;
@@ -35,6 +36,13 @@ public class BrokerHandler
         RespostaMapeada respostaMapeada = new();
 
         var listaProvedores = await ObterOrdemMelhoresProvedores(solicitacao);
+        if (listaProvedores is null || !listaProvedores.Any())
+        {
+            // todo: retornar erro quando não houver provedores que atendam aos critérios, por enquanto (nas próximas versões, talvez seja melhor enviar para qualquer um)
+            context.Response.StatusCode = (int)HttpStatusCode.ServiceUnavailable;
+            return;
+        }
+
         foreach (var provedorAlvo in listaProvedores.Select(provedor => ObterDadosProvedorAlvo(solicitacao.Nome, provedor)))
         {
             if (provedorAlvo is null)
