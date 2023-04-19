@@ -19,7 +19,7 @@ jobs:
           filename=$(basename "$f")
           extension="${filename##*.}"
           filename="${filename%.*}"
-          docker run --rm -v "$(pwd)/Docs/tccii/diagramas:/data" minlag/mermaid-cli -i "/data/$filename.$extension" -o "/data/$filename.png" -b transparent
+          docker run --rm -v "$(pwd)/Docs/tccii/diagramas:/data" minlag/mermaid-cli -i "/data/$filename.$extension" -o "/data/$filename.png" --scale 5
         done
 
     - name: Upload PNG files
