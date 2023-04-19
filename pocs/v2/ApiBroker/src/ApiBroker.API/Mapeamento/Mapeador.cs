@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.Json;
 using ApiBroker.API.Broker;
 using ApiBroker.API.Configuracoes;
 using Newtonsoft.Json;
@@ -19,7 +20,7 @@ public class Mapeador
     public HttpRequestMessage MapearRequisicao(HttpContext contextoOriginal, SolicitacaoDto solicitacao, ProvedorSettings provedorAlvo)
     {
         var uri = CriarUriAlvo(provedorAlvo.Rota, solicitacao.ParametrosRota);
-        return CriarRequisicao(contextoOriginal, uri);
+        return CriarRequisicao(contextoOriginal, uri, provedorAlvo);
     }
 
     private Uri CriarUriAlvo(string rota, Dictionary<string, string> parametrosRota)
@@ -36,14 +37,14 @@ public class Mapeador
         return rota;
     }
     
-    private HttpRequestMessage CriarRequisicao(HttpContext contextoOriginal, Uri uriAlvo)
+    private HttpRequestMessage CriarRequisicao(HttpContext contextoOriginal, Uri uriAlvo, ProvedorSettings provedorSettings)
     {
         var requisicao = new HttpRequestMessage();
         CopiarHeadersRequisicaoOriginal(contextoOriginal, requisicao);
 
         requisicao.RequestUri = uriAlvo;
         requisicao.Headers.Host = uriAlvo.Host;
-        requisicao.Method = ObterMetodoHttp(contextoOriginal.Request.Method);
+        requisicao.Method = ObterMetodoHttp(provedorSettings.Metodo ?? contextoOriginal.Request.Method);
 
         return requisicao;
     }
@@ -94,43 +95,61 @@ public class Mapeador
     /// <param name="respostaProvedor">Conteúdo retornado pelo provedor na requisição</param>
     /// <param name="provedorAcionado">Provedor que retornou a resposta</param>
     /// <param name="camposEsperados">Lista de campos que o cliente espera receber</param>
-    /// <param name="requisicaoOriginal">Contexto da requisição feita pelo cliente no Broker</param>
-    /// <returns></returns>
-    public RespostaMapeada MapearResposta(HttpResponseMessage respostaProvedor, ProvedorSettings provedorAcionado, string[] camposEsperados, HttpContext requisicaoOriginal)
+    /// <returns>Resposta mapeada com base nas configurações do Cliente</returns>
+    public RespostaMapeada MapearResposta(HttpResponseMessage respostaProvedor, ProvedorSettings provedorAcionado, string[] camposEsperados)
     {
-        var conteudoMapeado = SubstituirCamposParaCliente(respostaProvedor, provedorAcionado);
+        var conteudoMapeado = SubstituirCamposParaCliente(respostaProvedor, provedorAcionado, camposEsperados);
 
         // todo: avaliar incluir parse dos campos também, para tipos especificados pelo cliente
-        
-        var conteudoFiltrado = FiltrarCampos(conteudoMapeado, camposEsperados);
 
-        conteudoFiltrado["provedor"] =  provedorAcionado.Nome;
+        conteudoMapeado["provedor"] =  provedorAcionado.Nome;
 
         return new RespostaMapeada
         {
-            HttpResponseMessage = GerarHttpResponseMessage(conteudoFiltrado, respostaProvedor),
-            CamposMapeados = conteudoFiltrado
+            HttpResponseMessage = GerarHttpResponseMessage(conteudoMapeado, respostaProvedor),
+            CamposMapeados = conteudoMapeado
         };
     }
 
-    private string SubstituirCamposParaCliente(HttpResponseMessage respostaProvedor, ProvedorSettings provedor)
+    private Dictionary<string, string> SubstituirCamposParaCliente(HttpResponseMessage respostaProvedor, ProvedorSettings provedor, string[] camposEsperados)
     {
         var respostaString = respostaProvedor.Content.ReadAsStringAsync().Result;
-        
-        return provedor.FormatoResposta
-            .Aggregate(respostaString, (campo, desejado) =>
-                campo.Replace(desejado.NomeRecebido, desejado.NomeDesejado));
-    }
-
-    private Dictionary<string, string> FiltrarCampos(string conteudo, string[] camposEsperados)
-    {
-        var respostaJson = JsonConvert.DeserializeObject<Dictionary<string, string>>(conteudo);
-        if (respostaJson is null) 
+    
+        var json = ParseJson(respostaString);
+        if (json is null)
+            // todo: incluir mensagem de erro nas próximas versões
             return new Dictionary<string, string>();
 
-        return camposEsperados.ToDictionary(
-            chave => chave, 
-            chave => respostaJson[chave]);
+        var campos = new Dictionary<string, string>();
+
+        foreach (var campoEsperado in camposEsperados)
+        {
+            var formato = provedor.FormatoResposta
+                .FirstOrDefault(x => x.NomeDesejado == campoEsperado);
+
+            var path = formato?.NomeRecebido.Split('.') ?? new[] { campoEsperado };
+            
+            var prop = json;
+            foreach (var s in path)
+                prop = prop.Value.GetProperty(s);
+
+            campos.Add(formato?.NomeDesejado ?? campoEsperado, prop.Value.GetString());
+        }
+
+        return campos;
+    }
+
+    private JsonElement? ParseJson(string resposta)
+    {
+        try
+        {
+            return JsonDocument.Parse(resposta).RootElement;
+        }
+        catch (Exception)
+        {
+            // todo: incluir log
+            return null;
+        }
     }
 
     private HttpResponseMessage GerarHttpResponseMessage(Dictionary<string, string> campos, HttpResponseMessage respostaProvedor)
