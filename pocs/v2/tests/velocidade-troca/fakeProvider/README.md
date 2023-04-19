@@ -3,7 +3,7 @@
 JAVA 17
 
 ## Subir
-``./gradlew bootRun``
+`./gradlew bootRun --args=--server.port=8080`
 
 ## Rotas
 http://localhost:8080/correios-alt/01512020 POST
