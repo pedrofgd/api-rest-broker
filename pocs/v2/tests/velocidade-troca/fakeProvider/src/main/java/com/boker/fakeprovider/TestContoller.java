@@ -9,15 +9,15 @@ import java.util.concurrent.ForkJoinPool;
 @RestController
 @RequestMapping("/")
 public class TestContoller {
-    private static final Long REQUEST_CORREIOS_ALT = 10L;
-    private static final Long REQUEST_VIA_CEP = 100L;
-    private static final Long REQUEST_WIDENET = 100L;
-    private Long requests = 0L;
+//    private static final Long REQUEST_CORREIOS_ALT = 10L;
+//    private static final Long REQUEST_VIA_CEP = 100L;
+//    private static final Long REQUEST_WIDENET = 100L;
+//    private Long requests = 0L;
 
     @PostMapping("/correios-alt/{cep}")
     public DeferredResult<CorreiosAltDTO> correiosAltTest(@PathVariable String cep) {
-        requests++;
-        if (requests % REQUEST_CORREIOS_ALT >= REQUEST_CORREIOS_ALT / 2) throw new RuntimeException();
+//        requests++;
+//        if (requests % REQUEST_CORREIOS_ALT >= REQUEST_CORREIOS_ALT / 2) throw new RuntimeException();
         var result = new DeferredResult<CorreiosAltDTO>();
         ForkJoinPool.commonPool().submit(() -> {
             var dto = CorreiosAltDTO.builder()
@@ -52,8 +52,8 @@ public class TestContoller {
 
     @GetMapping("/via-cep/{cep}")
     public DeferredResult<ViaCepDTO> viaCepTest(@PathVariable String cep) {
-        requests++;
-        if (requests % REQUEST_VIA_CEP >= REQUEST_VIA_CEP / 2) throw new RuntimeException();
+//        requests++;
+//        if (requests % REQUEST_VIA_CEP >= REQUEST_VIA_CEP / 2) throw new RuntimeException();
         var result = new DeferredResult<ViaCepDTO>();
         ForkJoinPool.commonPool().submit(() -> {
             var dto = ViaCepDTO.builder()
@@ -76,8 +76,8 @@ public class TestContoller {
 
     @GetMapping("/widenet/{cep}")
     public DeferredResult<WidenetDTO> widenetTest(@PathVariable String cep) {
-        requests++;
-        if (requests % REQUEST_WIDENET >= REQUEST_WIDENET / 2) throw new RuntimeException();
+//        requests++;
+//        if (requests % REQUEST_WIDENET >= REQUEST_WIDENET / 2) throw new RuntimeException();
         var result = new DeferredResult<WidenetDTO>();
         ForkJoinPool.commonPool().submit(() -> {
             var dto = WidenetDTO.builder()
