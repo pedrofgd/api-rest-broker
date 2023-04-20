@@ -1,22 +1,17 @@
-%%{init: {'theme':'neutral'}}%%
+%%{init: {'theme': 'neutral'}}%%
 
 sequenceDiagram
     participant Healthchecker
-    participant Broker
-    participant Validador
-    participant Monitorador
     participant Configurações
+    participant Requisitor
     participant Provedor
+    participant Monitorador
 
     autonumber
-    Healthchecker-->>Broker: Envia uma requisição para um provedor
-    Broker->>Configurações: Obtém configurações do provedor
-    Configurações->>Broker: Configurações
-    Broker->>Provedor: Requisição
-    Provedor->>Broker: Resposta
-    Broker->>Validador: Verificar se o provedor atingiu os critérios
-    Validador->>Configurações: Obtém os critérios de health check do provedor
-    Configurações->>Validador: Critérios
-    Validador->>Broker: Resultado da validação
-    Broker->>Monitorador: Registra os resultados da validação
-    Broker-->>Broker: Agendar próxima execução do health check
+    Healthchecker->>Configurações: Obtém configurações do provedor
+    Configurações->> Healthchecker: Configurações
+    Healthchecker->>Requisitor: Enviar requisição
+    Requisitor->>Provedor: Requisição
+    Provedor->>Requisitor: Resposta
+    Healthchecker->>Monitorador: Registra métricas da resposta
+    Healthchecker-->>Healthchecker: Agendar próxima execução do health check
