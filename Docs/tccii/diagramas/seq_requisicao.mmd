@@ -1,16 +1,16 @@
 %%{init: {'theme':'neutral'}}%%
 
 sequenceDiagram
-    participant Cliente
+    actor Cliente
 
     box Broker para API REST
     participant Broker
+    participant Configurações
     participant Ranqueador
     participant Monitoramento
     participant Mapeador
     participant Requisitor
     participant Validador
-    participant Configurações
     participant Provedor
     end
     
@@ -20,7 +20,7 @@ sequenceDiagram
     Configurações->>Broker: Configurações do recurso
     loop Enquanto os critérios não forem atingidos
         Broker->>Ranqueador: Obter provedor ativo para o recurso
-        Ranqueador->>Monitoramento: Obter lista ordenada dos provedores para o recurso com base nos critérios configurados
+        Ranqueador->>Monitoramento: Obter lista ordenada dos provedores para<br> o recurso com base nos critérios configurados
         Monitoramento->>Ranqueador: Lista de provedores para o recurso
         Ranqueador->>Broker: Primeiro provedor da lista
         Broker->>Mapeador: Mapear objeto da requisição para o provedor
