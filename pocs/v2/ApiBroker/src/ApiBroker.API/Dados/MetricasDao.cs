@@ -53,6 +53,7 @@ public class MetricasDao
             "        |> filter(fn: (r) => r[\"_measurement\"] == \"metricas_recursos\")\n" +
             $"       |> filter(fn: (r) => r[\"nome_recurso\"] == \"{nomeRecurso}\")\n" +
             "        |> filter(fn: (r) => r[\"_field\"] == \"latencia\")\n" +
+            "        |> group(columns: [\"nome_provedor\"])\n" +
             "        |> mean()\n" +
             "    errorCount = from(bucket: \"logs\")\n" +
             "        |> range(start: -1h)\n" +
@@ -60,6 +61,7 @@ public class MetricasDao
             "        |> filter(fn: (r) => r[\"_field\"] == \"sucesso\")\n" +
             $"       |> filter(fn: (r) => r[\"nome_recurso\"] == \"{nomeRecurso}\")\n" +
             "        |> filter(fn: (r) => r[\"_value\"] == 0, onEmpty: \"keep\")\n" +
+            "        |> group(columns: [\"nome_provedor\"])\n" +
             "        |> count()\n" +
             "    return join(tables: {meanLatency: meanLatency, errorCount: errorCount}, on: [\"nome_provedor\"])\n" +
             "        |> map(fn: (r) => ({provider: r.nome_provedor, mean_latency: r._value_meanLatency, " +
