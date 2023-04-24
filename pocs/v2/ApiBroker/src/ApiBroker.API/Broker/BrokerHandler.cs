@@ -5,6 +5,8 @@ using ApiBroker.API.Requisicao;
 using ApiBroker.API.Dados;
 using ApiBroker.API.Ranqueamento;
 using ApiBroker.API.Validacao;
+using ApiBroker.API.WebSocket;
+using Microsoft.AspNetCore.SignalR;
 
 namespace ApiBroker.API.Broker;
 
@@ -61,6 +63,7 @@ public class BrokerHandler
 
             var validador = new Validador(solicitacao);
             var resultadoValido = validador.Validar(respostaMapeada);
+            await NotificarUi(context, listaProvedores.ToArray(), provedorAlvo.Nome);
             if (resultadoValido) break;
         }
         
@@ -117,5 +120,11 @@ public class BrokerHandler
             Origem = "RequisicaoCliente"
         };
         monitorador.Log(logDto);
+    }
+
+    private async Task NotificarUi(HttpContext context, string[] provedoresDisponiveis, string provedorAlvo)
+    {
+        var ranqueamentoHub = context.RequestServices.GetRequiredService<IHubContext<RanqueamentoHub>>();
+        await ranqueamentoHub.Clients.All.SendAsync("ReceiveMessage", provedoresDisponiveis, provedorAlvo);
     }
 }
