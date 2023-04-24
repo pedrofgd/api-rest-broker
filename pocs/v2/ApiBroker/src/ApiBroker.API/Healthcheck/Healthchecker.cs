@@ -41,16 +41,13 @@ public class Healthchecker
         var requisitor = new Requisitor();
 
         var requisicao = new HttpRequestMessage(HttpMethod.Get, provedor.Healthcheck!.RotaHealthcheck);
-        var (resposta, tempoRespostaMs) = await requisitor.EnviarRequisicao(requisicao);
+        var (resposta, tempoRespostaMs) = await requisitor.EnviarRequisicao(requisicao, provedor.Nome);
 
         LogResultado(nomeRecurso, provedor, resposta, tempoRespostaMs);
 
         var valido = resposta.IsSuccessStatusCode;
         var msg = $"Healthcheck {nomeRecurso}/{provedor.Nome} válido: {valido}";
-        if (!valido)
-            _logger.LogError(msg);
-        else
-            _logger.LogInformation(msg);
+        _logger.LogDebug(msg);
     }
 
     private void LogResultado(string nomeRecurso, ProvedorSettings provedor,

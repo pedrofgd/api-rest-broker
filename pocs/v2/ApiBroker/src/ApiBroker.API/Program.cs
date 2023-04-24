@@ -11,7 +11,6 @@ builder.Services.AddHealthCheckFake();
 var app = builder.Build();
 
 app.UseBroker();
-// todo: check desabilitado durante os testes
 app.UseInicializador(configuration);
 
 // Para testes na PoC

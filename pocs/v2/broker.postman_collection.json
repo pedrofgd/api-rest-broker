@@ -160,6 +160,71 @@
 			"name": "v2",
 			"item": [
 				{
+					"name": "java provider",
+					"item": [
+						{
+							"name": "8080 correios-alt",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/correios-alt/01512020",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"correios-alt",
+										"01512020"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "8081 viacep",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8081/via-cep/01512020",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8081",
+									"path": [
+										"via-cep",
+										"01512020"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "8082 widenet",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8082/widenet/01512020",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8082",
+									"path": [
+										"widenet",
+										"01512020"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
 					"name": "api/cep/{cep}",
 					"request": {
 						"method": "GET",
@@ -195,6 +260,27 @@
 							"path": [
 								"api",
 								"cep-promise",
+								"01222-020"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "api/cep-java/{cep}",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5070/api/cep-java/01222-020",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5070",
+							"path": [
+								"api",
+								"cep-java",
 								"01222-020"
 							]
 						}

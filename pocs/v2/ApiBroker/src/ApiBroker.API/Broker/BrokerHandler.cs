@@ -47,24 +47,29 @@ public class BrokerHandler
         {
             if (provedorAlvo is null)
                 return;
+            
+            _logger.LogInformation("Chamando {NomeProvedor}", provedorAlvo.Nome);
 
             var requisicao = mapeador.MapearRequisicao(context, solicitacao, provedorAlvo);
 
             var requisitor = new Requisitor();
-            var (respostaProvedor, tempoRespostaMs) = await requisitor.EnviarRequisicao(requisicao);
+            var (respostaProvedor, tempoRespostaMs) = await requisitor.EnviarRequisicao(requisicao, provedorAlvo.Nome);
+            LogResultado(solicitacao, provedorAlvo, respostaProvedor, tempoRespostaMs);
+            if (respostaProvedor is null) break;
 
             respostaMapeada = mapeador.MapearResposta(respostaProvedor, provedorAlvo, solicitacao.CamposResposta);
-
-            LogResultado(solicitacao, provedorAlvo, respostaProvedor, tempoRespostaMs);
 
             var validador = new Validador(solicitacao);
             var resultadoValido = validador.Validar(respostaMapeada);
             if (resultadoValido) break;
         }
         
-        context.Response.StatusCode = (int)respostaMapeada.HttpResponseMessage.StatusCode;
-        mapeador.CopiarHeadersRespostaProvedor(context, respostaMapeada.HttpResponseMessage);
-        await respostaMapeada.HttpResponseMessage.Content.CopyToAsync(context.Response.Body);
+        context.Response.StatusCode = (int)(respostaMapeada?.HttpResponseMessage?.StatusCode ?? HttpStatusCode.ServiceUnavailable);
+        if (respostaMapeada != null && respostaMapeada.HttpResponseMessage != null)
+        {
+            mapeador.CopiarHeadersRespostaProvedor(context, respostaMapeada.HttpResponseMessage);
+            await respostaMapeada.HttpResponseMessage.Content.CopyToAsync(context.Response.Body);
+        }
     }
 
     /// <summary>
@@ -108,7 +113,7 @@ public class BrokerHandler
             NomeRecurso = solicitacao.Nome,
             NomeProvedor = provedorAlvo.Nome,
             TempoRespostaMs = tempoRespostaMs,
-            Sucesso = respostaProvedor.IsSuccessStatusCode,
+            Sucesso = respostaProvedor?.IsSuccessStatusCode ?? false,
             Origem = "RequisicaoCliente"
         };
         monitorador.Log(logDto);
