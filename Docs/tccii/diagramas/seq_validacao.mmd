@@ -1,24 +1,20 @@
 %%{init: {'theme': 'neutral'}}%%
 
 sequenceDiagram
-    participant Cliente
+    participant Provedor
     participant Broker
     participant Validador
-    participant Provedor
 
     autonumber
-    Cliente->>Broker: Requisição para um recurso
-    Broker->>Broker: Processa a requisição
-    Broker->>Provedor: Envia a requisição para o provedor
-    Provedor->>Broker: Resposta
+    Provedor->>Broker: Resposta de uma requisição
     Broker->>Validador: Validar resposta
+    alt Os critérios foram atendidos
+        Validador->>Broker: Atendeu aos critérios
+    end
     alt Provedor não retornou todos os campos obrigatórios configurados no recurso
         Validador->>Broker: Não atendeu aos critérios
     else Contagem de erros do provedor atingiu o limite
         Validador->>Broker: Não atendeu aos critérios
     else Tempo de resposta foi acima do ideal e atingiu a contagem de tempo excedido
         Validador->>Broker: Não atendeu aos critérios
-    end
-    opt Os critérios foram atendidos
-        Validador->>Broker: Atendeu aos critérios
     end
