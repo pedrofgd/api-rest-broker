@@ -14,6 +14,12 @@ resource "aws_instance" "broker" {
     device_index         = 0
   }
 
+  user_data = <<EOF
+aws s3 sync s3://${aws_s3_bucket.bucket.id}/ content/
+cd content/src/ApiBroker.API/
+dotnet run
+  EOF
+
   tags = local.common_tags
 }
 
