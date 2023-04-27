@@ -11,7 +11,7 @@
 
 Ao final da execução, serão exibidas variáveis de saída, como o dns público criado para a instância e o id do buckect S3.
 
-Após aparecer a mensagem de sucesso na execução do Terraform, leva mais alguns minutos (entre 1 e 2) para instalar o runtime fazer o download do código do broker, instalar o sdk do .NET e iniciar a aplicação.
+Após aparecer a mensagem de sucesso na execução do Terraform, leva mais alguns minutos (entre 1 e 2) para fazer o download do código do broker no S3, instalar o sdk do .NET e iniciar a aplicação.
 
 Para validar que tudo funcionou corretamente, utilizar a URL do broker para faazer uma requisição via Postman (ou curl) em `GET http://<DNS_PLUBLICO_BROKER>/v1/fake/viacep/01222-020`
 
