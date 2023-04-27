@@ -10,13 +10,13 @@ O projeto nesse diretório poderá ser submetido aos mesmos cenários de teste q
 
 ## Funcionamento
 
-O que chamamos de provedores na nossa proposta, aqui são implementados `[services](./src/services/)`. Nesses arquivos as requisições são montadas e enviadas usando `fetch`, equivalente ao `HttpClient` na aplicação ApiBroker em .NET. Nós já estamos considerando na PoC os mesmos provedores de CEP (correios-alt, viacep, widenet).
+O que chamamos de provedores na nossa proposta, aqui são implementados [`services`](./src/services/). Nesses arquivos as requisições são montadas e enviadas usando `fetch`, equivalente ao `HttpClient` na aplicação ApiBroker em .NET. Nós já estamos considerando na PoC os mesmos provedores de CEP (correios-alt, viacep, widenet).
 
-O "orquestrador" é o `[cep-promise.js](./src/cep-promise.js)`, que faz alguns tratamentos no valor recebido na consulta, obtem os provedores **cadastrados**.
+O "orquestrador" é o [`cep-promise.js`](./src/cep-promise.js), que faz alguns tratamentos no valor recebido na consulta, obtem os provedores **cadastrados**.
 
 O usuário do pacote pode especificar quais provedores deseja utilizar dentre os disponíveis no catálogo. Caso informe uma lista de provedores (`configuration.providers`), então a consulta será disparada entre esses selecionados. Caso contrário, todos os provedores cadastrados serão acionados.
 
-A estratégia para consulta é: disparar ao mesmo tempo uma requisições para cada provedor. A resposta mais rápida será retornada para o cliente. Isso é implementado através do `[promise-any.js](./src/utils/promise-any.js)` e do método `[fetchCepFromServices](./src/cep-promise.js)`.
+A estratégia para consulta é: disparar ao mesmo tempo uma requisições para cada provedor. A resposta mais rápida será retornada para o cliente. Isso é implementado através do [`promise-any.js`](./src/utils/promise-any.js) e do método [`fetchCepFromServices`](./src/cep-promise.js).
 
 O que chamamos de mapeamento da resposta é feito aqui também. A resposta específica dos provedores é mapeada para um objeto padrão, porém isso é implementado por provedor e "hard-coded", não dinamicamente.
 
