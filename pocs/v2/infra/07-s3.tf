@@ -5,8 +5,8 @@ resource "aws_s3_bucket" "bucket" {
 
 resource "aws_s3_object" "broker" {
   for_each = fileset("/Users/pedrodias/dev/tcc-mack/pocs/v2/ApiBroker/", "**")
-  bucket = local.s3_bucket_name
-  key    = each.value
+  bucket = aws_s3_bucket.bucket.id
+  key    =  "broker/${each.value}"
   source = "/Users/pedrodias/dev/tcc-mack/pocs/v2/ApiBroker/${each.value}"
 }
 
