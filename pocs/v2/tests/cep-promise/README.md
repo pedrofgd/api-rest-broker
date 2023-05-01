@@ -1,4 +1,6 @@
-Clonado do repositório original: [BrasilAPI/cep-promise](https://github.com/BrasilAPI/cep-promise)
+Análise do repositório original: [BrasilAPI/cep-promise](https://github.com/BrasilAPI/cep-promise)
+
+:warning: provavelmente não será feito para entrega do TCC II
 
 A estratégia utilizada por essa ferramenta pode ser uma alternativa ao sistema que estamos propondo.
 
