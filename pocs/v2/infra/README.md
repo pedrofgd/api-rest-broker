@@ -1,5 +1,8 @@
 # Infra
 
+Pré-requisitos:
+- Terraform v1.4.6+ (verificar com `terraform -v`)
+
 ## Criar a infraestrutura na AWS
 
 1. Obter as credenciais da AWS pelo Console (access key e secret key) e exportar usando `export AWS_ACCESS_KEY_ID=<SECRET>` e `export AWS_SECRET_ACCESS_KEY=<SECRET>` ou com `aws configure` (necessário instalar a ferramenta CLI)
@@ -36,3 +39,4 @@ Para fazer a copia dos arquivos do bucket, utilizar `aws s3 sync s3://<BUCKET_ID
 - [Avaliar: Publicando uma aplicação ASP.NET Core no Linux com o Nginx](https://www.treinaweb.com.br/blog/publicando-uma-aplicacao-asp-net-core-no-linux-com-o-nginx)
 - [Avaliar: How to Create Key Pair in AWS using Terraform in Right Way](https://cloudkatha.com/how-to-create-key-pair-in-aws-using-terraform-in-right-way/)
 - [fileset function should include optional ignore patterns](https://github.com/hashicorp/terraform/issues/25074)
+- [Troubleshoot: asp net core 6.0 kestrel server is not working](https://stackoverflow.com/questions/69532898/asp-net-core-6-0-kestrel-server-is-not-working)
