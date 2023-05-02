@@ -2,6 +2,7 @@ import Head from 'next/head'
 import { Inter } from 'next/font/google'
 import styles from '@/styles/Home.module.css'
 import { LogLevel, HubConnectionBuilder } from '@microsoft/signalr';
+import { ReactElement, useState } from 'react';
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -10,8 +11,7 @@ const connection = new HubConnectionBuilder()
   .configureLogging(LogLevel.Information)
   .build();
 
-async function startConnection()
-{
+async function startConnection() {
   try {
     await connection.start();
     console.log("SignalR Connected.")
@@ -26,12 +26,31 @@ async function startConnection()
 };
 
 // Start the connection with websocket server
-startConnection(); 
+startConnection();
 
 export default function Home() {
-  connection.on('ReceiveMessage', (providers, activeProvider) => {
+  const [providers, setProviders] = useState<String[]>([]);
+  const [active, setActive] = useState<String>();
+  const [result, setResult] = useState<ReactElement[]>([])
+
+
+  connection.on('ReceiveMessage', (providers: String[], activeProvider: String) => {
+    setProviders(providers)
+    setActive(activeProvider)
+    let temp = [<h1>Teste</h1>, <h2>inativo</h2>]
+    providers.forEach(element => {
+      temp.push(<h1>{element}</h1>);
+      if (active === element)
+        temp.push(<h2>ativo</h2>)
+      else
+        temp.push(<h2>inativo</h2>)
+    });
+
+    setResult(temp)
     console.log(`Received message from ${providers}: ${activeProvider}`);
   });
+
+
 
 
   return (
@@ -43,8 +62,9 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className={`${styles.main} ${inter.className}`}>
-        <h1>Portal para analisar o Broker em tempo real <br/>("speedometro")</h1>
-        <p style={{fontSize: "1.2rem", padding: "0.5rem"}}>Em construção...</p>
+        <h1>Portal para analisar o Broker em tempo real <br />("speedometro")</h1>
+        <p style={{ fontSize: "1.2rem", padding: "0.5rem" }}>Em construção...</p>
+        {result}
       </main>
     </>
   )
