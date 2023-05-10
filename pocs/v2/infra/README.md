@@ -52,6 +52,8 @@ docker push pedrofgd/tcc-broker:v0.1.0
 
 :warning: Importante: as imagens ficarão visíveis publicamente com esse método (utilizando o Docker Hub gratuito)
 
+Os passos a seguir são para deploy da aplicação do Broker, que incluir a aplicação .NET, o InfluxDB e futuramente o frontend (com speedometro etc). Isso será configurado automaticamente para executar ao iniciar a instância EC2.
+
 É necessário criar a rede:
 ``` bash
 # Create Docker network
@@ -114,4 +116,5 @@ docker run -d \
 - [Avaliar: How to Create Key Pair in AWS using Terraform in Right Way](https://cloudkatha.com/how-to-create-key-pair-in-aws-using-terraform-in-right-way/)
 - [fileset function should include optional ignore patterns](https://github.com/hashicorp/terraform/issues/25074)
 - [Troubleshoot: asp net core 6.0 kestrel server is not working](https://stackoverflow.com/questions/69532898/asp-net-core-6-0-kestrel-server-is-not-working)
+- [Deploying InfluxDB 2.0 Using Docker](https://medium.com/geekculture/deploying-influxdb-2-0-using-docker-6334ced65b6c)
    
