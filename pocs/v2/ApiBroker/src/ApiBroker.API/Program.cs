@@ -14,14 +14,6 @@ builder.Services.AddHealthCheckFake();
 
 #endregion
 
-if (builder.Environment.IsProduction())
-{
-    builder.WebHost.UseKestrel();
-    builder.WebHost.ConfigureKestrel(opt => {
-        opt.ListenAnyIP(5000);
-    });
-}
-
 var app = builder.Build();
 
 app.UseBroker();
@@ -34,5 +26,7 @@ app.UseProvedoresFake();
 app.UseHealthcheckFake();
 
 #endregion
+
+app.UseHttpsRedirection();
 
 app.Run();
