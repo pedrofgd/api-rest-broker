@@ -24,13 +24,15 @@ Para validar que tudo funcionou corretamente, utilizar a URL do broker (variáve
 
 ## Comandos e troubleshoot
 
-Para acessar a inatancia: `ssh -i "keys/aws_key" ec2-user@<DNS_PUBLICO_IPV4>`. O DNS é exibido como "output" após a execução do comando `terraform apply`.
+Para acessar a inatancia: `ssh -i "keys/aws_key" ubuntu@<DNS_PUBLICO_IPV4>`. O DNS é exibido como "output" após a execução do comando `terraform apply`.
+
+**Obs:** caso dê algum problema para conectar, como `permission denied (public key)`, verificar se o [user name está correto de acordo com a AMI](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/TroubleshootingInstancesConnecting.html#TroubleshootingInstancesConnectingPuTTY).
 
 Acessar a máquina com ssh pode ser útil para debugar em caso de algum problema.
 
-Para fazer a copia dos arquivos do bucket, utilizar `aws s3 sync s3://<BUCKET_ID>/broker src/` (variável `bucket` exibida como ouput no terminal). O id do bucket também é exibido após aplicar a configuração.
+É possível verificar os logs da inicialização da instância com `sudo cat /var/log/cloud-init-output.log`, para debugar algum problema na execução dos comandos de `user_data`.
 
-É possível verificar os logs da inicialização da instância com `sudo cat /var/log/cloud-init-output.log`, para debugar algum problema na execução dos comandos de `user_data`
+Utilizar também `sudo docker logs <ID_CONTAINER>`.
 
 # Deploy das aplicações
 
@@ -45,6 +47,8 @@ docker login
 # Fazer o push da imagem Docker para o Docker Hub
 docker push pedrofgd/tcc-broker:v0.1.0
 ```
+
+**Obs:** fazer isso para todas as imagens necessárias.
 
 :warning: Importante: as imagens ficarão visíveis publicamente com esse método (utilizando o Docker Hub gratuito)
 

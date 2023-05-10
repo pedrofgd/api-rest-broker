@@ -8,6 +8,4 @@ locals {
     organization = var.organization
     project      = "${var.project}-${var.organization}"
   }
-
-  s3_bucket_name = "${var.project}-${var.organization}-${random_integer.rand.result}"
 }
