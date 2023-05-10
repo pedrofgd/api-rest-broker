@@ -30,9 +30,16 @@ public class BrokerHandler
     /// <param name="context">Contexto da requisição</param>
     public async Task Invoke(HttpContext context)
     {
-        var solicitacao = ObterRecursoSolicitado(context.Request.Path);
+        var path = context.Request.Path;
+        
+        _logger.LogInformation("Requisição recebida em {Path}", path);
+        
+        var solicitacao = ObterRecursoSolicitado(path);
         if (solicitacao is null)
+        {
+            _logger.LogWarning("Erro ao obter todos os detalhes da solicitação. A requisição será encerrada");
             return;
+        }
 
         var mapeador = new Mapeador();
         RespostaMapeada respostaMapeada = new();
@@ -40,31 +47,45 @@ public class BrokerHandler
         var listaProvedores = await ObterOrdemMelhoresProvedores(solicitacao);
         if (listaProvedores is null || !listaProvedores.Any())
         {
+            _logger.LogWarning("Não há provedores disponíveis para atender a requisição");
             // todo: retornar erro quando não houver provedores que atendam aos critérios, por enquanto (nas próximas versões, talvez seja melhor enviar para qualquer um)
             context.Response.StatusCode = (int)HttpStatusCode.ServiceUnavailable;
             return;
         }
-
-        foreach (var provedorAlvo in listaProvedores.Select(provedor => ObterDadosProvedorAlvo(solicitacao.Nome, provedor)))
+        
+        _logger.LogInformation("Iniciando consulta aos provedores na ordem de melhor para o pior");
+        foreach (var provedor in listaProvedores)
         {
+            var provedorAlvo = ObterDadosProvedorAlvo(solicitacao.NomeRecurso, provedor);
             if (provedorAlvo is null)
+            {
+                _logger.LogWarning("Configurações incorretas para o provedor com nome: {NomeProvedor}", provedor);
                 return;
-            
+            }
+
             _logger.LogInformation("Chamando {NomeProvedor}", provedorAlvo.Nome);
 
             var requisicao = mapeador.MapearRequisicao(context, solicitacao, provedorAlvo);
 
             var requisitor = new Requisitor();
-            var (respostaProvedor, tempoRespostaMs) = await requisitor.EnviarRequisicao(requisicao, provedorAlvo.Nome);
+            var (respostaProvedor, tempoRespostaMs) = await requisitor.EnviarRequisicao(requisicao, provedorAlvo.Nome, solicitacao.NomeRecurso);
             LogResultado(solicitacao, provedorAlvo, respostaProvedor, tempoRespostaMs);
-            if (respostaProvedor is null) break;
+            if (respostaProvedor is null)
+            {
+                _logger.LogWarning("Não foi possível obter resposta no provedor {NomeProvedor}", provedor);
+                break;
+            }
 
             respostaMapeada = mapeador.MapearResposta(respostaProvedor, provedorAlvo, solicitacao.CamposResposta);
 
             var validador = new Validador(solicitacao);
             var resultadoValido = validador.Validar(respostaMapeada);
             await NotificarUi(context, listaProvedores.ToArray(), provedorAlvo.Nome);
-            if (resultadoValido) break;
+            if (resultadoValido)
+            {
+                _logger.LogInformation("O provedor {NomeProvedor} atingiu os critérios da requisição", provedor);
+                break;
+            }
         }
         
         context.Response.StatusCode = (int)(respostaMapeada?.HttpResponseMessage?.StatusCode ?? HttpStatusCode.ServiceUnavailable);
@@ -89,7 +110,7 @@ public class BrokerHandler
     private async Task<List<string>> ObterOrdemMelhoresProvedores(SolicitacaoDto solicitacao)
     {
         var ranqueador = new Ranqueador();
-        var todosProvedoresDisponiveis =  await ranqueador.ObterOrdemMelhoresProvedores(solicitacao);
+        var todosProvedoresDisponiveis =  await ranqueador.ObterOrdemMelhoresProvedores(solicitacao, _configuration);
 
         return solicitacao.TentarTodosProvedoresAteSucesso
             ? todosProvedoresDisponiveis
@@ -113,13 +134,13 @@ public class BrokerHandler
         var monitorador = new MetricasDao();
         var logDto = new LogDto
         {
-            NomeRecurso = solicitacao.Nome,
+            NomeRecurso = solicitacao.NomeRecurso,
             NomeProvedor = provedorAlvo.Nome,
             TempoRespostaMs = tempoRespostaMs,
             Sucesso = respostaProvedor?.IsSuccessStatusCode ?? false,
             Origem = "RequisicaoCliente"
         };
-        monitorador.Log(logDto);
+        monitorador.Log(logDto, _configuration);
     }
 
     private async Task NotificarUi(HttpContext context, string[] provedoresDisponiveis, string provedorAlvo)

@@ -5,42 +5,77 @@ namespace ApiBroker.API.Dados;
 
 public class MetricasDao
 {
-    public void Log(LogDto logDto)
+    private readonly ILogger<MetricasDao> _logger;
+
+    public MetricasDao()
     {
-        using var influx = InfluxDbClientFactory.OpenConnection();
-        var writeApi = influx.GetWriteApiAsync();
+        _logger = LoggerFactory.Factory().CreateLogger<MetricasDao>();
+    }
+    
+    public void Log(LogDto logDto, IConfiguration configuration)
+    {
+        try
+        {
+            using var influx = InfluxDbClientFactory.OpenConnection(configuration);
+            var writeApi = influx.GetWriteApi();
+            
+            _logger.LogInformation("Registrando log de {NomeRecurso}/{NomeProvedor}", logDto.NomeRecurso, logDto.NomeProvedor);
 
-        var point = PointData.Measurement("metricas_recursos")
-            .Tag("nome_recurso", logDto.NomeRecurso)
-            .Tag("nome_provedor", logDto.NomeProvedor)
-            .Tag("origem", logDto.Origem)
-            .Field("latencia", logDto.TempoRespostaMs)
-            .Field("sucesso", logDto.Sucesso ? 1 : 0)
-            .Timestamp(DateTime.UtcNow, WritePrecision.Ms);
+            var point = PointData.Measurement("metricas_recursos")
+                .Tag("nome_recurso", logDto.NomeRecurso)
+                .Tag("nome_provedor", logDto.NomeProvedor)
+                .Tag("origem", logDto.Origem)
+                .Field("latencia", logDto.TempoRespostaMs)
+                .Field("sucesso", logDto.Sucesso ? 1 : 0)
+                .Timestamp(DateTime.UtcNow, WritePrecision.Ms);
 
-#pragma warning disable CS4014
-        writeApi.WritePointAsync(point, "logs", "broker");
-#pragma warning disable CS4014
+            writeApi.WritePoint(point, "logs", "broker");
+        }
+        catch (Exception e)
+        {
+            _logger.LogWarning("Erro ao registrar log no InfluxDB. Erro: {MensagemErro}", e.Message);
+            throw;
+        }
     }
 
-    public async Task<List<Dictionary<string, object>>> ObterDadosProvedores(String nomeRecurso)
+    public async Task<List<Dictionary<string, object>>> ObterDadosProvedores(String nomeRecurso, IConfiguration configuration)
     {
-        using var influx = InfluxDbClientFactory.OpenConnection();
-        var queryApi = influx.GetQueryApi();
+        try
+        {
+            _logger.LogInformation("Consultando base de monitoramento para obter os dados dos provedores");
+            
+            using var influx = InfluxDbClientFactory.OpenConnection(configuration);
+            var queryApi = influx.GetQueryApi();
         
-        var fluxTables = await queryApi.QueryAsync(Query(nomeRecurso), "broker");
+            var fluxTables = await queryApi.QueryAsync(Query(nomeRecurso), "broker");
         
-        var providers = (
-            from fluxTable in fluxTables
-            from fluxRecord in fluxTable.Records
-            select new Dictionary<string, object>
-            {
-                { "name", fluxRecord.GetValueByKey("provider") },
-                { "response_time", Convert.ToDouble(fluxRecord.GetValueByKey("mean_latency")) },
-                { "error_rate", Convert.ToInt32(fluxRecord.GetValueByKey("error_count")) }
-            }).ToList();
+            var provedores = (
+                from fluxTable in fluxTables
+                from fluxRecord in fluxTable.Records
+                select new Dictionary<string, object>
+                {
+                    { "name", fluxRecord.GetValueByKey("provider") },
+                    { "response_time", Convert.ToDouble(fluxRecord.GetValueByKey("mean_latency")) },
+                    { "error_rate", Convert.ToInt32(fluxRecord.GetValueByKey("error_count")) }
+                }).ToList();
+
+            var listaProvedoresDisponiveis = provedores.Any()
+                ? string.Join(",", provedores.Select(p => (string)p["name"]))
+                : "0";
+
+            _logger.LogInformation(
+                "Base de monitoramento retornou os provedores para o recurso '{NomeRecurso}'. " +
+                "Provedores disponíveis: {ProvedoresDisponiveis}",
+                nomeRecurso, listaProvedoresDisponiveis
+            );
         
-        return providers;
+            return provedores;
+        }
+        catch (Exception)
+        {
+            _logger.LogWarning("Erro ao obter dados de provedores no InfluxDB");
+            throw;
+        }
     }
 
     private static string Query(string nomeRecurso)

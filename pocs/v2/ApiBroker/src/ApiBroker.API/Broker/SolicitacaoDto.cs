@@ -5,7 +5,7 @@ namespace ApiBroker.API.Broker;
 
 public class SolicitacaoDto
 {
-    public string Nome { get; set; }
+    public string NomeRecurso { get; set; }
     public List<ProvedorSettings> Provedores { get; set; }
     public string[] CamposResposta { get; set; }
     public Dictionary<string, string> ParametrosRota { get; set; }

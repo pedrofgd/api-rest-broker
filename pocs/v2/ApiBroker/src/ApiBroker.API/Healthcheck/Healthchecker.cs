@@ -11,6 +11,7 @@ public class Healthchecker
     public Healthchecker()
     {
         _logger = LoggerFactory.Factory().CreateLogger<Healthchecker>();
+        
     }
 
     /// <summary>
@@ -19,31 +20,32 @@ public class Healthchecker
     /// </summary>
     /// <param name="nomeRecurso">Nome do recurso para qual o provedor foi configurado</param>
     /// <param name="provedor">Configurações do provedor alvo</param>
-    public async Task CheckPeriodicamente(string nomeRecurso, ProvedorSettings provedor)
+    /// <param name="configuration">Configurações</param>
+    public async Task CheckPeriodicamente(string nomeRecurso, ProvedorSettings provedor, IConfiguration configuration)
     {
         /*
          * todo: disparando o primeiro manualmente, e então agendando os próximos
          *  Confirmar se há outra forma
          */
-        await Check(nomeRecurso, provedor);
+        await Check(nomeRecurso, provedor, configuration);
         
         // Vai executar repetidamente no intervalo configurado no timer
         var intervalo = TimeSpan.FromSeconds(provedor.Healthcheck!.IntervaloEmSegundos);
         var timer = new PeriodicTimer(intervalo);
         while (await timer.WaitForNextTickAsync())
         {
-            await Check(nomeRecurso, provedor);
+            await Check(nomeRecurso, provedor, configuration);
         }
     }
 
-    private async Task Check(string nomeRecurso, ProvedorSettings provedor)
+    private async Task Check(string nomeRecurso, ProvedorSettings provedor, IConfiguration configuration)
     {
         var requisitor = new Requisitor();
 
         var requisicao = new HttpRequestMessage(HttpMethod.Get, provedor.Healthcheck!.RotaHealthcheck);
-        var (resposta, tempoRespostaMs) = await requisitor.EnviarRequisicao(requisicao, provedor.Nome);
+        var (resposta, tempoRespostaMs) = await requisitor.EnviarRequisicao(requisicao, provedor.Nome, nomeRecurso);
 
-        LogResultado(nomeRecurso, provedor, resposta, tempoRespostaMs);
+        LogResultado(nomeRecurso, provedor, resposta, tempoRespostaMs, configuration);
 
         var valido = resposta.IsSuccessStatusCode;
         var msg = $"Healthcheck {nomeRecurso}/{provedor.Nome} válido: {valido}";
@@ -51,7 +53,7 @@ public class Healthchecker
     }
 
     private void LogResultado(string nomeRecurso, ProvedorSettings provedor,
-        HttpResponseMessage resultadoCheck, long tempoRespostaMs)
+        HttpResponseMessage resultadoCheck, long tempoRespostaMs, IConfiguration configuration)
     {
         var monitorador = new MetricasDao();
         var logDto = new LogDto
@@ -62,6 +64,6 @@ public class Healthchecker
             Sucesso = resultadoCheck.IsSuccessStatusCode,
             Origem = "Healthcheck"
         };
-        monitorador.Log(logDto);
+        monitorador.Log(logDto, configuration);
     }
 }

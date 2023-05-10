@@ -11,7 +11,7 @@ public class Requisitor
         _logger = LoggerFactory.Factory().CreateLogger<Requisitor>();
     }
     
-    public async Task<Tuple<HttpResponseMessage, long>> EnviarRequisicao(HttpRequestMessage requisicao, string nomeProvedorAlvo)
+    public async Task<Tuple<HttpResponseMessage, long>> EnviarRequisicao(HttpRequestMessage requisicao, string nomeProvedorAlvo, string nomeRecurso)
     {
         var watch = Stopwatch.StartNew();
         
@@ -21,12 +21,16 @@ public class Requisitor
             httpClient.Timeout = TimeSpan.FromSeconds(2);
             
             var resultado = await httpClient.SendAsync(requisicao);
+
+            _logger.LogInformation("Requisição realizada no provedor {NomeRecurso}/{NomeProvedor}", nomeRecurso, nomeProvedorAlvo);
             return new Tuple<HttpResponseMessage, long>(resultado, watch.ElapsedMilliseconds);
         }
         catch (Exception e)
         {
-            _logger.LogDebug(e.Message);
-            _logger.LogError("Erro ao enviar requisição para {NomeProvedor}", nomeProvedorAlvo);
+            _logger.LogError(
+                "Erro ao enviar requisição para {NomeRecurso}/{NomeProvedor}. Erro: {MensagemErro}",
+                nomeRecurso, nomeProvedorAlvo, e.Message
+            );
             return new Tuple<HttpResponseMessage, long>(null, watch.ElapsedMilliseconds);
         }
     }
