@@ -47,4 +47,11 @@ public static class ConfiguracoesUtils
         var recurso = recursos?.FirstOrDefault(r => r.Nome == nomeRecurso);
         return recurso?.Provedores.FirstOrDefault(provedor => provedor.Nome == nomeProvedor);
     }
+
+    public static InfluxDbSettings ObterConfigInfluxDb(IConfiguration configuration)
+    {
+        return configuration.GetSection(InfluxDbSettings.InfluxDbConfig)
+            .Get<InfluxDbSettings>();
+    }
+    
 }
