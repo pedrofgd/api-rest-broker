@@ -2,9 +2,6 @@ name: Draw.io Diagrams to PNG
 
 on:
   workflow_dispatch:
-  push:
-    paths:
-      - 'Docs/tccii/cloud/**'
 
 jobs:
   build:
