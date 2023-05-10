@@ -32,6 +32,74 @@ Para fazer a copia dos arquivos do bucket, utilizar `aws s3 sync s3://<BUCKET_ID
 
 É possível verificar os logs da inicialização da instância com `sudo cat /var/log/cloud-init-output.log`, para debugar algum problema na execução dos comandos de `user_data`
 
+# Deploy das aplicações
+
+Antes de tudo, fazer o upload das imagens das aplicações (broker e frontend) para o Docker Hub:
+``` bash
+# Fazer o build da imagem Docker
+docker build --no-cache -t pedrofgd/tcc-broker:v0.1.0 .
+
+# Fazer login no Docker Hub
+docker login
+
+# Fazer o push da imagem Docker para o Docker Hub
+docker push pedrofgd/tcc-broker:v0.1.0
+```
+
+:warning: Importante: as imagens ficarão visíveis publicamente com esse método (utilizando o Docker Hub gratuito)
+
+É necessário criar a rede:
+``` bash
+# Create Docker network
+docker network create tcc-network
+```
+
+## Deploy InfluxDB
+
+Criar o contaier com a imagem do influx 2.6:
+``` bash
+docker run -d \
+  --name=influxdb \
+  --network=tcc-network \
+  -p 8086:8086 \
+  -e DOCKER_INFLUXDB_INIT_MODE=setup \
+  -e DOCKER_INFLUXDB_INIT_USERNAME=admin \
+  -e DOCKER_INFLUXDB_INIT_PASSWORD=01Senha! \
+  -e DOCKER_INFLUXDB_INIT_ORG=broker \
+  -e DOCKER_INFLUXDB_INIT_BUCKET=logs \
+  -e DOCKER_INFLUXDB_INIT_RETENTION=7d \
+  influxdb:2.6
+```
+
+E então obter o token para escrever/ler do banco de dados:
+``` bash
+INFLUX_ACCESS_TOKEN=$(docker exec influxdb influx auth list | awk '/admin/ {print $4}')
+```
+
+## Deploy do Broker
+
+Criar o container:
+``` bash
+docker run -d \
+  --name=broker \
+  --network=tcc-network \
+  -p 5070:80\
+  -e InfluxDbSettings__Url=http://influxdb:8086 \
+  -e InfluxDbSettings__Token=$ACCESS_TOKEN \
+  pedrofgd/tcc-broker:v0.1.0
+```
+
+## Deploy da aplicação frontend
+
+``` bash
+# Run Next.js frontend
+docker run -d \
+  --name=portal \
+  --network=tcc-network \
+  -p 8080:8080 \
+  my-nextjs-app:latest
+```
+
 # Referências e documentação
 
 - [Terraform how to do SSH in AWS EC2 instance?](https://jhooq.com/terraform-ssh-into-aws-ec2/)
@@ -42,3 +110,4 @@ Para fazer a copia dos arquivos do bucket, utilizar `aws s3 sync s3://<BUCKET_ID
 - [Avaliar: How to Create Key Pair in AWS using Terraform in Right Way](https://cloudkatha.com/how-to-create-key-pair-in-aws-using-terraform-in-right-way/)
 - [fileset function should include optional ignore patterns](https://github.com/hashicorp/terraform/issues/25074)
 - [Troubleshoot: asp net core 6.0 kestrel server is not working](https://stackoverflow.com/questions/69532898/asp-net-core-6-0-kestrel-server-is-not-working)
+   
