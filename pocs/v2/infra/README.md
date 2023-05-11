@@ -32,7 +32,7 @@ Acessar a máquina com ssh pode ser útil para debugar em caso de algum problema
 
 É possível verificar os logs da inicialização da instância com `sudo cat /var/log/cloud-init-output.log`, para debugar algum problema na execução dos comandos de `user_data`.
 
-Utilizar também `sudo docker logs <ID_CONTAINER>`.
+Utilizar também `sudo docker logs <ID_CONTAINER>`, para ver os logs do container e `docker exec <ID_CONTAINER> /usr/bin/env` para ver as variáveis.
 
 ### Solução para eventual erro de "Connection Refused" no Broker
 

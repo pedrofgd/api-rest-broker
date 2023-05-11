@@ -46,7 +46,7 @@ public class Healthchecker
         
         var requisicao = new HttpRequestMessage
         {
-            Method = new HttpMethod(provedor.Metodo),
+            Method = provedor.Metodo != null ? new HttpMethod(provedor.Metodo) : HttpMethod.Get,
             RequestUri = new Uri(provedor.Healthcheck!.RotaHealthcheck)
         };
         
