@@ -34,6 +34,12 @@ Acessar a máquina com ssh pode ser útil para debugar em caso de algum problema
 
 Utilizar também `sudo docker logs <ID_CONTAINER>`.
 
+### Solução para eventual erro de "Connection Refused" no Broker
+
+Tentar executar `sudo docker restart broker`, para reiniciar o container.
+
+Isso aconteceu algumas vezes durante os testes. A melhor solução foi aumentar o tempo que o script de `user_data` da instância do broker deve aguardar para criar o container. Assim haverá tempo para o provedor e as configurações de rede estarem ok para uso.
+
 # Deploy das aplicações
 
 Antes de tudo, fazer o upload das imagens das aplicações (broker e frontend) para o Docker Hub:
@@ -96,6 +102,8 @@ docker run -d \
 ```
 
 ## Deploy da aplicação frontend
+
+- [ ] Pendente de concluir
 
 ``` bash
 # Run Next.js frontend
