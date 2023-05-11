@@ -3,5 +3,37 @@
   flex-direction: column;
   justify-content: center;
   text-align: center;
-  min-height: 100vh;
+  height: 100vh;
+  width: 100vw;
+  background-color: #141519;
 }
+
+.div{
+  border-color: red;
+  border-style: dashed;
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  height: 80%;
+  width: 100%;
+  
+}
+
+.section{
+  border-color: blue;
+  border-style: dashed;
+  display: flex;
+  flex-direction: column;
+  height: 40%;
+  width: 20%;
+  background-color: #1B222D;
+  gap: 10%;
+}
+
+.h1 {
+  color: #F2F2F2;
+}
+.h2{
+  color: #727984;
+}
+

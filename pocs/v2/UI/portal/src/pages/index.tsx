@@ -37,20 +37,22 @@ export default function Home() {
   connection.on('ReceiveMessage', (providers: String[], activeProvider: String) => {
     setProviders(providers)
     setActive(activeProvider)
-    let temp = [<h1>Teste</h1>, <h2>inativo</h2>]
-    providers.forEach(element => {
-      temp.push(<h1>{element}</h1>);
-      if (active === element)
-        temp.push(<h2>ativo</h2>)
-      else
-        temp.push(<h2>inativo</h2>)
+    let temp: ReactElement[] = []
+    providers.forEach((provider, position) => {
+      temp.push(
+        <section className={`${styles.section} ${inter.className}`}>
+          <h2 className={`${styles.h2} ${inter.className}`}>
+            Posição: {position + 1}
+          </h2>
+          <h1 className={`${styles.h1} ${inter.className}`}>
+            Provedor: {provider}
+          </h1>
+        </section>)
     });
 
     setResult(temp)
     console.log(`Received message from ${providers}: ${activeProvider}`);
   });
-
-
 
 
   return (
@@ -63,8 +65,9 @@ export default function Home() {
       </Head>
       <main className={`${styles.main} ${inter.className}`}>
         <h1>Portal para analisar o Broker em tempo real <br />("speedometro")</h1>
-        <p style={{ fontSize: "1.2rem", padding: "0.5rem" }}>Em construção...</p>
-        {result}
+        <div className={`${styles.div} ${inter.className}`}>
+          {result}
+        </div>
       </main>
     </>
   )
