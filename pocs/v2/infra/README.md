@@ -83,6 +83,8 @@ docker run -d \
   influxdb:2.6
 ```
 
+Essa configuração já cria tudo que é necessário para o broker começar a enviar as métricas e obter os dados de provedores disponíveis. Esse comando substitui os [processos manuais de configuração do Influx, definidos na primeira PoC](https://github.com/pedrofgd/tcc-mack/tree/main/pocs/v2/monitor).
+
 E então obter o token para escrever/ler do banco de dados:
 ``` bash
 INFLUX_ACCESS_TOKEN=$(docker exec influxdb influx auth list | awk '/admin/ {print $4}')
