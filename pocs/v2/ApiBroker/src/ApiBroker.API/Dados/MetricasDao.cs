@@ -19,7 +19,8 @@ public class MetricasDao
             using var influx = InfluxDbClientFactory.OpenConnection(configuration);
             var writeApi = influx.GetWriteApi();
             
-            _logger.LogInformation("Registrando log de {NomeRecurso}/{NomeProvedor}", logDto.NomeRecurso, logDto.NomeProvedor);
+            _logger.LogInformation("Registrando log de {NomeRecurso}/{NomeProvedor}", 
+                logDto.NomeRecurso, logDto.NomeProvedor);
 
             var point = PointData.Measurement("metricas_recursos")
                 .Tag("nome_recurso", logDto.NomeRecurso)

@@ -53,9 +53,11 @@ public class BrokerHandler
             return;
         }
         
-        _logger.LogInformation("Iniciando consulta aos provedores na ordem de melhor para o pior");
+        _logger.LogInformation("Requisição pronta para ser enviada ao provedor");
         foreach (var provedor in listaProvedores)
         {
+            _logger.LogInformation("Iniciando tentativa no provedor {NomeRecurso}/{NomeProvedir}", 
+                solicitacao.NomeRecurso, provedor);
             var provedorAlvo = ObterDadosProvedorAlvo(solicitacao.NomeRecurso, provedor);
             if (provedorAlvo is null)
             {
@@ -86,6 +88,8 @@ public class BrokerHandler
                 _logger.LogInformation("O provedor {NomeProvedor} atingiu os critérios da requisição", provedor);
                 break;
             }
+            
+            _logger.LogInformation("O provedor não atingiu os critérios");
         }
         
         context.Response.StatusCode = (int)(respostaMapeada?.HttpResponseMessage?.StatusCode ?? HttpStatusCode.ServiceUnavailable);
