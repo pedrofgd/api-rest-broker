@@ -106,6 +106,32 @@ docker run -d \
   my-nextjs-app:latest
 ```
 
+## Deploy dos provedores fake
+
+Utilizar a aplicação de provedor fake criada com Spring Boot e Java 17:
+
+``` bash
+# Fazer o build da imagem Docker utilizando o Dockerfile na raíz da aplicação
+docker build -t pedrofgd/tcc-provedor-fake:v0.1.0 .
+
+# Fazer o login no Docker Hub
+docker login
+
+# Fazer o push da imagem Docker para o Docker Hub
+docker push pedrofgd/tcc-provedor-fake:v0.1.0
+```
+
+Utilizar o comando `docker run` para criar o container do provedor fake:
+
+``` bash
+docker run -d \
+  --name=provedor-fake \
+  -p 80:8080\
+  pedrofgd/tcc-provedor-fake:v0.1.0
+```
+
+**Obs:** Cada provedor poderá rodar em uma máquina virtual, para simular uma situação mais próxima da realidade, com latência de rede etc. Então poderíamos criar sem utilizar a rede `tcc-network`, utilizada anteriormente com o API Broker e o InfluxDB.
+
 # Referências e documentação
 
 - [Terraform how to do SSH in AWS EC2 instance?](https://jhooq.com/terraform-ssh-into-aws-ec2/)

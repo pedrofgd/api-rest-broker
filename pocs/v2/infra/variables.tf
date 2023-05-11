@@ -28,7 +28,7 @@ variable "vpc_subnets_cidr_block" {
   default     = ["10.0.0.0/24", "10.0.1.0/24"]
 }
 
-variable "broker_ec2_instance_type" {
+variable "default_ec2_instance_type" {
   type        = string
   description = "Type for Broker EC2 instance"
   default     = "t4g.small"
