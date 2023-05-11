@@ -11,7 +11,6 @@ public class Healthchecker
     public Healthchecker()
     {
         _logger = LoggerFactory.Factory().CreateLogger<Healthchecker>();
-        
     }
 
     /// <summary>
@@ -41,8 +40,14 @@ public class Healthchecker
     private async Task Check(string nomeRecurso, ProvedorSettings provedor, IConfiguration configuration)
     {
         var requisitor = new Requisitor();
-
-        var requisicao = new HttpRequestMessage(HttpMethod.Get, provedor.Healthcheck!.RotaHealthcheck);
+        
+        var requisicao = new HttpRequestMessage
+        {
+            Method = new HttpMethod(provedor.Metodo),
+            RequestUri = new Uri(provedor.Healthcheck!.RotaHealthcheck)
+        };
+        
+        // todo: criar outra assinatura para receber o método HTTP e a url
         var (resposta, tempoRespostaMs) = await requisitor.EnviarRequisicao(requisicao, provedor.Nome, nomeRecurso);
 
         LogResultado(nomeRecurso, provedor, resposta, tempoRespostaMs, configuration);
