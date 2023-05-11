@@ -66,7 +66,7 @@ public class MetricasDao
 
             _logger.LogInformation(
                 "Base de monitoramento retornou os provedores para o recurso '{NomeRecurso}'. " +
-                "Provedores disponíveis: {ProvedoresDisponiveis}",
+                "Provedores: {ProvedoresDisponiveis}",
                 nomeRecurso, listaProvedoresDisponiveis
             );
         
