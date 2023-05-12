@@ -85,14 +85,14 @@ public class MetricasDao
         return
             "ranking = () => {\n" +
             "    meanLatency = from(bucket: \"logs\")\n" +
-            "        |> range(start: -1h)\n" +
+            "        |> range(start: -5s)\n" + // todo: testando
             "        |> filter(fn: (r) => r[\"_measurement\"] == \"metricas_recursos\")\n" +
             $"       |> filter(fn: (r) => r[\"nome_recurso\"] == \"{nomeRecurso}\")\n" +
             "        |> filter(fn: (r) => r[\"_field\"] == \"latencia\")\n" +
             "        |> group(columns: [\"nome_provedor\"])\n" +
             "        |> mean()\n" +
             "    errorCount = from(bucket: \"logs\")\n" +
-            "        |> range(start: -1h)\n" +
+            "        |> range(start: -5s)\n" + // todo: testando
             "        |> filter(fn: (r) => r[\"_measurement\"] == \"metricas_recursos\")\n" +
             "        |> filter(fn: (r) => r[\"_field\"] == \"sucesso\")\n" +
             $"       |> filter(fn: (r) => r[\"nome_recurso\"] == \"{nomeRecurso}\")\n" +
