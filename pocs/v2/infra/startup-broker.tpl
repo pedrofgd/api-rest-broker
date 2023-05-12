@@ -7,11 +7,10 @@ sudo systemctl start docker.service
 
 sudo docker info
 
-# Criar rede para habilitar comunicação entre o Broker e o InfluxDB
+# Rede para habilitar comunicação entre os container do broker
 echo "Creating docker network..."
 sudo docker network create tcc-network
 
-# Criar container para o InfluxDB
 echo "Creating InfluxDB container..."
 sudo docker run -d \
   --name=influxdb \
@@ -31,7 +30,6 @@ sleep 5
 # Obter token de acesso do InfluxDB
 INFLUX_ACCESS_TOKEN=`sudo docker exec influxdb influx auth list | awk '/admin/ {print $4}'`
 
-# Criar container para a aplicação do Broker
 echo "Creating API Broker container..."
 
 # Aguardar um pouco para o provedor também ser inicializado
@@ -51,4 +49,19 @@ sudo docker run -d \
   -e Recursos__0__provedores__1__healthcheck__rotaHealthcheck=http://${dns_provedor}/via-cep/01222020 \
   -e Recursos__0__provedores__2__rota=http://${dns_provedor}/widenet/{cep} \
   -e Recursos__0__provedores__2__healthcheck__rotaHealthcheck=http://${dns_provedor}/widenet/01222020 \
+  -e PortalSettings__Host=http://portal:3000 \
   pedrofgd/tcc-broker:v0.1.0
+
+echo "Setting up API Broker container..."
+sleep 5
+
+BROKER_CONTAINER_IP=`sudo docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' broker`
+
+echo "Creating Frontend container..."
+sudo docker run -d \
+  --name=portal \
+  --network=tcc-network \
+  --entrypoint sh \
+  -p 3000:3000 \
+  pedrofgd/tcc-portal:v0.1.0 \
+  -c "export BROKER_IP=$BROKER_CONTAINER_IP && npm run dev"
