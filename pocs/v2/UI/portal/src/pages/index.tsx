@@ -6,8 +6,11 @@ import { ReactElement, useState } from 'react';
 
 const inter = Inter({ subsets: ['latin'] })
 
+const brokerHost = process.env.BROKER_IP ?? "localhost:5070";
+console.log("BROKER_IP =", brokerHost)
+
 const connection = new HubConnectionBuilder()
-  .withUrl('http://localhost:5070/ranqueamento')
+  .withUrl(`http://${brokerHost}/ranqueamento`)
   .configureLogging(LogLevel.Information)
   .build();
 
@@ -32,7 +35,6 @@ export default function Home() {
   const [providers, setProviders] = useState<String[]>([]);
   const [active, setActive] = useState<String>();
   const [result, setResult] = useState<ReactElement[]>([])
-
 
   connection.on('ReceiveMessage', (providers: String[], activeProvider: String) => {
     setProviders(providers)
