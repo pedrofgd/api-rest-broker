@@ -1,6 +1,6 @@
 resource "aws_network_interface" "broker" {
   subnet_id       = aws_subnet.public_subnets[1].id
-  security_groups = [aws_security_group.default.id]
+  security_groups = [aws_security_group.broker.id]
 
   tags = local.common_tags
 }
