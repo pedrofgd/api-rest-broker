@@ -6,7 +6,7 @@ using ApiBroker.API.WebSocket;
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
 
-builder.Services.AddWebSocket();
+builder.Services.AddWebSocket(configuration);
 
 #region Para testes durante a PoC
 
