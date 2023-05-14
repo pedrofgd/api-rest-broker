@@ -6,11 +6,13 @@ namespace ApiBroker.API.Inicializacao;
 public class Inicializador
 {
     private readonly ILogger<Inicializador> _logger;
+    private readonly IConfiguration _configuration;
     private readonly List<RecursoSettings> _recursos;
 
     public Inicializador(IConfiguration configuration)
     {
         _logger = LoggerFactory.Factory().CreateLogger<Inicializador>();
+        _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
         _recursos = ConfiguracoesUtils.ObterTodosRecursos(configuration) ?? throw new ArgumentNullException(nameof(configuration));
     }
 
@@ -70,7 +72,7 @@ public class Inicializador
     {
         var healthchecker = new Healthchecker();
 #pragma warning disable CS4014
-        healthchecker.CheckPeriodicamente(nomeRecurso, provedor);
+        healthchecker.CheckPeriodicamente(nomeRecurso, provedor, _configuration);
 #pragma warning restore CS4014
     }
 }

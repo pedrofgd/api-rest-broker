@@ -27,4 +27,6 @@ app.UseHealthcheckFake();
 
 #endregion
 
+app.UseHttpsRedirection();
+
 app.Run();
