@@ -1,50 +1,50 @@
 %%{init: {'theme':'neutral'}}%%
 
 sequenceDiagram
-    actor Cliente
+    actor Aplicação Cliente
 
     box Broker para API REST
-    participant Broker
-    participant Configurações
+    participant Orquestrador
+    participant Cátalogo de APIs
     participant Ranqueador
     participant Monitoramento
-    participant Mapeador
+    participant Adapdator de Objetos
     participant Requisitor
     participant Validador
     participant Provedor
     end
     
     autonumber
-    Cliente->>Broker: Enviar request para o provedor
-    Broker->>Configurações: Identificar recurso que o cliente quer acessar
-    Configurações->>Broker: Configurações do recurso
+    Aplicação Cliente->>Orquestrador: Enviar request para o provedor
+    Orquestrador->>Cátalogo de APIs: Identificar recurso que o cliente quer acessar
+    Cátalogo de APIs->>Orquestrador: Cátalogo de APIs do recurso
     loop Enquanto os critérios não forem atingidos
-        Broker->>Ranqueador: Obter provedor ativo para o recurso
+        Orquestrador->>Ranqueador: Obter provedor ativo para o recurso
         Ranqueador->>Monitoramento: Obter lista ordenada dos provedores para<br> o recurso com base nos critérios configurados
         Monitoramento->>Ranqueador: Lista de provedores para o recurso
-        Ranqueador->>Broker: Primeiro provedor da lista
-        Broker->>Mapeador: Mapear objeto da requisição para o provedor
-        Mapeador->>Configurações: Obter configurações da requisição do provedor ativo
-        Configurações->>Mapeador: Configurações do provedor
-        Mapeador->>Broker: Requisição mapeada para o provedor
-        Broker->>Requisitor: Envia a requisição
+        Ranqueador->>Orquestrador: Primeiro provedor da lista
+        Orquestrador->>Adapdator de Objetos: Mapear objeto da requisição para o provedor
+        Adapdator de Objetos->>Cátalogo de APIs: Obter configurações da requisição do provedor ativo
+        Cátalogo de APIs->>Adapdator de Objetos: Cátalogo de APIs do provedor
+        Adapdator de Objetos->>Orquestrador: Requisição mapeada para o provedor
+        Orquestrador->>Requisitor: Envia a requisição
         Requisitor->>Provedor: Envia a requisição
         Provedor->>Requisitor: Resposta
-        Requisitor->>Broker: Resposta
-        Broker->>Validador: Verificar se a resposta do provedor atende os critérios
-        Validador->>Configurações: Obter critérios do recurso solicitado
-        Configurações->>Validador: Critérios
-        Validador->>Broker: Resultado da validação
-        Broker->>Monitoramento: Registra os resultados da validação
+        Requisitor->>Orquestrador: Resposta
+        Orquestrador->>Validador: Verificar se a resposta do provedor atende os critérios
+        Validador->>Cátalogo de APIs: Obter critérios do recurso solicitado
+        Cátalogo de APIs->>Validador: Critérios
+        Validador->>Orquestrador: Resultado da validação
+        Orquestrador->>Monitoramento: Registra os resultados da validação
         alt Provedor atendeu aos critérios
-            Broker->>Mapeador: Mapear objeto de resposta
-            Mapeador->>Configurações: Obter configurações da resposta do recurso solicitado
-            Mapeador->>Broker: Resposta mapeada para o cliente
-            Broker->>Cliente: Resposta
+            Orquestrador->>Adapdator de Objetos: Mapear objeto de resposta
+            Adapdator de Objetos->>Cátalogo de APIs: Obter configurações da resposta do recurso solicitado
+            Adapdator de Objetos->>Orquestrador: Resposta mapeada para o cliente
+            Orquestrador->>Aplicação Cliente: Resposta
         else Provedor não atendeu aos critérios
-            Broker->>Broker: Tenta próximo provedor da lista 
+            Orquestrador->>Orquestrador: Tenta próximo provedor da lista 
         end
         opt Nenhum dos provedores atingiu aos critérios
-            Broker->>Cliente: Erro
+            Orquestrador->>Aplicação Cliente: Erro
         end
     end
