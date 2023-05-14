@@ -3,4 +3,9 @@ const nextConfig = {
   reactStrictMode: true,
 }
 
-module.exports = nextConfig
+module.exports = {
+  nextConfig,
+  env: {
+    BROKER_IP: process.env.BROKER_IP
+  }
+}

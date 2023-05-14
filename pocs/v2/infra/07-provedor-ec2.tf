@@ -1,6 +1,6 @@
 resource "aws_network_interface" "provedor" {
   subnet_id       = aws_subnet.public_subnets[0].id
-  security_groups = [aws_security_group.default.id]
+  security_groups = [aws_security_group.provedor.id]
 
   tags = local.common_tags
 }

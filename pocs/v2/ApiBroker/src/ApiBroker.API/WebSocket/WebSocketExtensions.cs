@@ -2,13 +2,16 @@ namespace ApiBroker.API.WebSocket;
 
 public static class WebSocketExtensions
 {
-    public static void AddWebSocket(this IServiceCollection services)
+    public static void AddWebSocket(this IServiceCollection services, IConfiguration configuration)
     {
+        var hostPortal = configuration["PortalSettings:Host"];
+        ArgumentException.ThrowIfNullOrEmpty(hostPortal);
+        
         services.AddCors(options =>
         {
             options.AddPolicy("Portal", builder =>
             {
-                builder.WithOrigins("http://localhost:3000")
+                builder.WithOrigins(hostPortal)
                     .AllowAnyHeader()
                     .AllowAnyMethod()
                     .AllowCredentials();

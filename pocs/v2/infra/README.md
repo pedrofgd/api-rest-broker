@@ -54,7 +54,8 @@ docker login
 docker push pedrofgd/tcc-broker:v0.1.0
 ```
 
-**Obs:** fazer isso para todas as imagens necessárias.
+**Obs1:** fazer isso para todas as imagens necessárias.
+**Obs2:** executar o `docker build` no diretório que contem o Dockerfile da imagem desejada ou passar o caminho completo no lugar do `.`
 
 :warning: Importante: as imagens ficarão visíveis publicamente com esse método (utilizando o Docker Hub gratuito)
 
@@ -97,23 +98,41 @@ Criar o container:
 docker run -d \
   --name=broker \
   --network=tcc-network \
-  -p 5070:80\
+  -p 80:80\
   -e InfluxDbSettings__Url=http://influxdb:8086 \
-  -e InfluxDbSettings__Token=$ACCESS_TOKEN \
+  -e InfluxDbSettings__Token=$INFLUX_ACCESS_TOKEN \
+  -e Recursos__0__provedores__0__rota=http://${dns_provedor}/correios-alt/{cep} \
+  -e Recursos__0__provedores__0__healthcheck__rotaHealthcheck=http://${dns_provedor}/correios-alt/01222020 \
+  -e Recursos__0__provedores__1__rota=http://${dns_provedor}/via-cep/{cep} \
+  -e Recursos__0__provedores__1__healthcheck__rotaHealthcheck=http://${dns_provedor}/via-cep/01222020 \
+  -e Recursos__0__provedores__2__rota=http://${dns_provedor}/widenet/{cep} \
+  -e Recursos__0__provedores__2__healthcheck__rotaHealthcheck=http://${dns_provedor}/widenet/01222020 \
+  -e PortalSettings__Host=http://portal:3000 \
   pedrofgd/tcc-broker:v0.1.0
 ```
 
 ## Deploy da aplicação frontend
 
-- [ ] Pendente de concluir
+Fazer o build e push da imagem Docker para o Docker Hub:
+
+``` bash
+# Fazer o build da imagem Docker
+docker build -t pedrofgd/tcc-portal:v0.1.0 .
+
+# Fazer login no Docker Hub
+docker login
+
+# Fazer o push da imagem Docker para o Docker Hub
+docker push pedrofgd/tcc-portal:v0.1.0
+```
 
 ``` bash
 # Run Next.js frontend
 docker run -d \
   --name=portal \
   --network=tcc-network \
-  -p 8080:8080 \
-  my-nextjs-app:latest
+  -p 3000:3000 \
+  pedrofgd/tcc-portal:v0.1.0
 ```
 
 ## Deploy dos provedores fake
