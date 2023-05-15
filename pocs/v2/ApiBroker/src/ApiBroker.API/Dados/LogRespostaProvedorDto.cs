@@ -1,6 +1,6 @@
 namespace ApiBroker.API.Dados;
 
-public class LogDto
+public class LogRespostaProvedorDto
 {
     public string NomeRecurso { get; set; }
     public string NomeProvedor { get; set; }

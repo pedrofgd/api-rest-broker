@@ -7,7 +7,7 @@ export const options = {
   ]
 };
 
-const brokerURL = "http://localhost:5070/api/cep-java/01222-020";
+const brokerURL = "http://localhost:5070/api/cep-promise/01222-020";
 
 export default () => {
   
