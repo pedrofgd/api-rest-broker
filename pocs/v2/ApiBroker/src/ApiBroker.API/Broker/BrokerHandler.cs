@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Net;
 using ApiBroker.API.Configuracoes;
 using ApiBroker.API.Mapeamento;
@@ -15,12 +16,20 @@ public class BrokerHandler
     private readonly RequestDelegate _next;
     private readonly IConfiguration _configuration;
     private readonly ILogger<BrokerHandler> _logger;
+    private readonly MetricasDao _metricasDao;
+    
+    private bool SucessoNaRequisicao { get; set; }
+    private int QtdeProvedoresTentados { get; set; }
+    private long TempoTotalRespostaProvedores { get; set; }
+    private string ProvedorSelecionado { get; set; }
 
     public BrokerHandler(RequestDelegate next, IConfiguration configuration)
     {
         _next = next;
         _configuration = configuration;
         _logger = LoggerFactory.Factory().CreateLogger<BrokerHandler>();
+        
+        _metricasDao = new MetricasDao();
     }
 
     /// <summary>
@@ -30,17 +39,19 @@ public class BrokerHandler
     /// <param name="context">Contexto da requisição</param>
     public async Task Invoke(HttpContext context)
     {
-        var path = context.Request.Path;
+        var watch = Stopwatch.StartNew();
         
+        var path = context.Request.Path;
         _logger.LogInformation("Requisição recebida em {Path}", path);
         
         var solicitacao = ObterRecursoSolicitado(path);
         if (solicitacao is null)
         {
             _logger.LogWarning("Erro ao obter todos os detalhes da solicitação. A requisição será encerrada");
+            context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
             return;
         }
-
+        
         var mapeador = new Mapeador();
         RespostaMapeada respostaMapeada = new();
 
@@ -58,6 +69,8 @@ public class BrokerHandler
         {
             _logger.LogInformation("Iniciando tentativa no provedor {NomeRecurso}/{NomeProvedir}", 
                 solicitacao.NomeRecurso, provedor);
+            QtdeProvedoresTentados++;
+            
             var provedorAlvo = ObterDadosProvedorAlvo(solicitacao.NomeRecurso, provedor);
             if (provedorAlvo is null)
             {
@@ -70,33 +83,48 @@ public class BrokerHandler
             var requisicao = mapeador.MapearRequisicao(context, solicitacao, provedorAlvo);
 
             var requisitor = new Requisitor();
-            var (respostaProvedor, tempoRespostaMs) = await requisitor.EnviarRequisicao(requisicao, provedorAlvo.Nome, solicitacao.NomeRecurso);
-            LogResultado(solicitacao, provedorAlvo, respostaProvedor, tempoRespostaMs);
+            var (respostaProvedor, tempoRespostaMs) = await requisitor.EnviarRequisicao(requisicao, 
+                provedorAlvo.Nome, solicitacao.NomeRecurso);
+            
+            LogResultadoProvedor(solicitacao, provedorAlvo, respostaProvedor, tempoRespostaMs);
+            TempoTotalRespostaProvedores += tempoRespostaMs;
+            
             if (respostaProvedor is null)
             {
                 _logger.LogWarning("Não foi possível obter resposta no provedor {NomeProvedor}", provedor);
-                break;
+                continue;
             }
 
             respostaMapeada = mapeador.MapearResposta(respostaProvedor, provedorAlvo, solicitacao.CamposResposta);
 
             var validador = new Validador(solicitacao);
-            var resultadoValido = validador.Validar(respostaMapeada);
+            SucessoNaRequisicao = validador.Validar(respostaMapeada);
             await NotificarUi(context, listaProvedores.ToArray(), provedorAlvo.Nome);
-            if (resultadoValido)
+            if (SucessoNaRequisicao)
             {
                 _logger.LogInformation("O provedor {NomeProvedor} atingiu os critérios da requisição", provedor);
+                ProvedorSelecionado = provedorAlvo.Nome;
                 break;
             }
             
             _logger.LogInformation("O provedor não atingiu os critérios");
         }
         
-        context.Response.StatusCode = (int)(respostaMapeada?.HttpResponseMessage?.StatusCode ?? HttpStatusCode.ServiceUnavailable);
-        if (respostaMapeada != null && respostaMapeada.HttpResponseMessage != null)
+        watch.Stop();
+        LogPerformanceBroker(solicitacao.NomeRecurso, ProvedorSelecionado, QtdeProvedoresTentados,
+            SucessoNaRequisicao, TempoTotalRespostaProvedores, 
+            watch.ElapsedMilliseconds);
+        
+        if (SucessoNaRequisicao)
         {
+            context.Response.StatusCode = (int)respostaMapeada.HttpResponseMessage.StatusCode;
             mapeador.CopiarHeadersRespostaProvedor(context, respostaMapeada.HttpResponseMessage);
             await respostaMapeada.HttpResponseMessage.Content.CopyToAsync(context.Response.Body);
+        }
+        else
+        {
+            context.Response.StatusCode = (int)HttpStatusCode.ServiceUnavailable;
+            // todo: pendente retornar uma mensagem de erro
         }
     }
 
@@ -132,11 +160,10 @@ public class BrokerHandler
         return ConfiguracoesUtils.ObterDadosProvedorRecurso(nomeRecurso, nomeProvedor, _configuration);
     }
 
-    private void LogResultado(SolicitacaoDto solicitacao, ProvedorSettings provedorAlvo,
+    private void LogResultadoProvedor(SolicitacaoDto solicitacao, ProvedorSettings provedorAlvo,
         HttpResponseMessage respostaProvedor, long tempoRespostaMs)
     {
-        var monitorador = new MetricasDao();
-        var logDto = new LogDto
+        var logDto = new LogRespostaProvedorDto
         {
             NomeRecurso = solicitacao.NomeRecurso,
             NomeProvedor = provedorAlvo.Nome,
@@ -144,12 +171,35 @@ public class BrokerHandler
             Sucesso = respostaProvedor?.IsSuccessStatusCode ?? false,
             Origem = "RequisicaoCliente"
         };
-        monitorador.Log(logDto, _configuration);
+        _metricasDao.LogRespostaProvedor(logDto, _configuration);
+    }
+
+    private void LogPerformanceBroker(string nomeRecurso, string provedorSelecionado,
+        int qtdeProvedoresTentados, bool sucessoNaRequisicao, long tempoRespostaProvedores, long tempoRespostaTotal)
+    {
+        var logDto = new LogPerformanceBrokerDto
+        {
+            NomeRecurso = nomeRecurso,
+            ProvedorSelecionado = provedorSelecionado,
+            QtdeProvedoresTentados = qtdeProvedoresTentados,
+            RetornouErroAoCliente = sucessoNaRequisicao,
+            TempoRespostaProvedores = tempoRespostaProvedores,
+            TempoRespostaTotal = tempoRespostaTotal
+        };
+        _metricasDao.LogPerformanceBroker(logDto, _configuration);
     }
 
     private async Task NotificarUi(HttpContext context, string[] provedoresDisponiveis, string provedorAlvo)
     {
+        var watch = Stopwatch.StartNew();
+        _logger.LogInformation("Notificando UI antes de retornar resposta ao cliente...");
+        
         var ranqueamentoHub = context.RequestServices.GetRequiredService<IHubContext<RanqueamentoHub>>();
         await ranqueamentoHub.Clients.All.SendAsync("ReceiveMessage", provedoresDisponiveis, provedorAlvo);
+        
+        watch.Stop();
+        _logger.LogInformation(
+            "UI notificada com sucesso. ElapsedMilliseconds: {ElapsedMilliseconds}",
+            watch.ElapsedMilliseconds);
     }
 }

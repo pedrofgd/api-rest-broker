@@ -12,34 +12,64 @@ public class MetricasDao
         _logger = LoggerFactory.Factory().CreateLogger<MetricasDao>();
     }
     
-    public void Log(LogDto logDto, IConfiguration configuration)
+    public void LogRespostaProvedor(LogRespostaProvedorDto logRespostaProvedorDto, IConfiguration configuration)
     {
         try
         {
             using var influx = InfluxDbClientFactory.OpenConnection(configuration);
             var writeApi = influx.GetWriteApi();
             
-            _logger.LogInformation("Registrando log de {NomeRecurso}/{NomeProvedor}", 
-                logDto.NomeRecurso, logDto.NomeProvedor);
+            _logger.LogInformation("Registrando log da resposta do provedor {NomeRecurso}/{NomeProvedor}", 
+                logRespostaProvedorDto.NomeRecurso, logRespostaProvedorDto.NomeProvedor);
 
             var point = PointData.Measurement("metricas_recursos")
-                .Tag("nome_recurso", logDto.NomeRecurso)
-                .Tag("nome_provedor", logDto.NomeProvedor)
-                .Tag("origem", logDto.Origem)
-                .Field("latencia", logDto.TempoRespostaMs)
-                .Field("sucesso", logDto.Sucesso ? 1 : 0)
+                .Tag("nome_recurso", logRespostaProvedorDto.NomeRecurso)
+                .Tag("nome_provedor", logRespostaProvedorDto.NomeProvedor)
+                .Tag("origem", logRespostaProvedorDto.Origem)
+                .Field("latencia", logRespostaProvedorDto.TempoRespostaMs)
+                .Field("sucesso", logRespostaProvedorDto.Sucesso ? 1 : 0)
                 .Timestamp(DateTime.UtcNow, WritePrecision.Ms);
 
             writeApi.WritePoint(point, "logs", "broker");
         }
         catch (Exception e)
         {
-            _logger.LogWarning("Erro ao registrar log no InfluxDB. Erro: {MensagemErro}", e.Message);
+            _logger.LogWarning("Erro ao registrar log da resposta do provedor no InfluxDB. Erro: {MensagemErro}", e.Message);
             throw;
         }
     }
 
-    public async Task<List<Dictionary<string, object>>> ObterDadosProvedores(String nomeRecurso, IConfiguration configuration)
+    public void LogPerformanceBroker(LogPerformanceBrokerDto logPerformanceBrokerDto, IConfiguration configuration)
+    {
+        try
+        {
+            using var influx = InfluxDbClientFactory.OpenConnection(configuration);
+            var writeApi = influx.GetWriteApi();
+            
+            _logger.LogInformation("Registrando log de performance do Broker para resposta a chamada no recurso {NomeRecurso}", 
+                logPerformanceBrokerDto.NomeRecurso);
+
+            var point = PointData.Measurement("performance_broker")
+                .Tag("nome_recurso", logPerformanceBrokerDto.NomeRecurso)
+                .Field("provedor_selecionado", logPerformanceBrokerDto.ProvedorSelecionado)
+                .Field("tempo_resposta_total", logPerformanceBrokerDto.TempoRespostaTotal)
+                .Field("tempo_resposta_provedor", logPerformanceBrokerDto.TempoRespostaProvedores)
+                .Field("qtde_provedores_tentados", logPerformanceBrokerDto.QtdeProvedoresTentados)
+                .Field("retornou_erro_ao_cliente", logPerformanceBrokerDto.RetornouErroAoCliente)
+                .Timestamp(DateTime.UtcNow, WritePrecision.Ms);
+
+            writeApi.WritePoint(point, "logs", "broker");
+        }
+        catch (Exception e)
+        {
+            _logger.LogWarning(
+                "Erro ao registrar log de performance do Broker no InfluxDB para resposta a chamada no recurso {NomeRecurso}. " +
+                "Erro: {MensagemErro}", logPerformanceBrokerDto.NomeRecurso, e.Message);
+            throw;
+        }
+    }
+
+    public async Task<List<Dictionary<string, object>>> ObterDadosProvedores(string nomeRecurso, IConfiguration configuration)
     {
         try
         {
@@ -47,8 +77,34 @@ public class MetricasDao
             
             using var influx = InfluxDbClientFactory.OpenConnection(configuration);
             var queryApi = influx.GetQueryApi();
+            
+            // todo: rever range na consulta (talvez ser parte da configuração do cliente)
+            var query =
+                "ranking = () => {\n" +
+                "    meanLatency = from(bucket: \"logs\")\n" +
+                "        |> range(start: -5s)\n" + // todo: testando
+                "        |> filter(fn: (r) => r[\"_measurement\"] == \"metricas_recursos\")\n" +
+                $"       |> filter(fn: (r) => r[\"nome_recurso\"] == \"{nomeRecurso}\")\n" +
+                "        |> filter(fn: (r) => r[\"_field\"] == \"latencia\")\n" +
+                "        |> group(columns: [\"nome_provedor\"])\n" +
+                "        |> mean()\n" +
+                "    errorCount = from(bucket: \"logs\")\n" +
+                "        |> range(start: -5s)\n" + // todo: testando
+                "        |> filter(fn: (r) => r[\"_measurement\"] == \"metricas_recursos\")\n" +
+                "        |> filter(fn: (r) => r[\"_field\"] == \"sucesso\")\n" +
+                $"       |> filter(fn: (r) => r[\"nome_recurso\"] == \"{nomeRecurso}\")\n" +
+                "        |> filter(fn: (r) => r[\"_value\"] == 0, onEmpty: \"keep\")\n" +
+                "        |> group(columns: [\"nome_provedor\"])\n" +
+                "        |> count()\n" +
+                "    return join(tables: {meanLatency: meanLatency, errorCount: errorCount}, on: [\"nome_provedor\"])\n" +
+                "        |> map(fn: (r) => ({provider: r.nome_provedor, mean_latency: r._value_meanLatency, " +
+                "               error_count: r._value_errorCount}))\n" +
+                "        |> sort(columns: [\"error_count\"])\n" +
+                "        |> yield(name: \"ranking\")\n" +
+                "}\n" +
+                "ranking()";
         
-            var fluxTables = await queryApi.QueryAsync(Query(nomeRecurso), "broker");
+            var fluxTables = await queryApi.QueryAsync(query, "broker");
         
             var provedores = (
                 from fluxTable in fluxTables
@@ -77,34 +133,5 @@ public class MetricasDao
             _logger.LogWarning("Erro ao obter dados de provedores no InfluxDB");
             throw;
         }
-    }
-
-    private static string Query(string nomeRecurso)
-    {
-        // todo: rever range na consulta (talvez ser parte da configuração do cliente)
-        return
-            "ranking = () => {\n" +
-            "    meanLatency = from(bucket: \"logs\")\n" +
-            "        |> range(start: -5s)\n" + // todo: testando
-            "        |> filter(fn: (r) => r[\"_measurement\"] == \"metricas_recursos\")\n" +
-            $"       |> filter(fn: (r) => r[\"nome_recurso\"] == \"{nomeRecurso}\")\n" +
-            "        |> filter(fn: (r) => r[\"_field\"] == \"latencia\")\n" +
-            "        |> group(columns: [\"nome_provedor\"])\n" +
-            "        |> mean()\n" +
-            "    errorCount = from(bucket: \"logs\")\n" +
-            "        |> range(start: -5s)\n" + // todo: testando
-            "        |> filter(fn: (r) => r[\"_measurement\"] == \"metricas_recursos\")\n" +
-            "        |> filter(fn: (r) => r[\"_field\"] == \"sucesso\")\n" +
-            $"       |> filter(fn: (r) => r[\"nome_recurso\"] == \"{nomeRecurso}\")\n" +
-            "        |> filter(fn: (r) => r[\"_value\"] == 0, onEmpty: \"keep\")\n" +
-            "        |> group(columns: [\"nome_provedor\"])\n" +
-            "        |> count()\n" +
-            "    return join(tables: {meanLatency: meanLatency, errorCount: errorCount}, on: [\"nome_provedor\"])\n" +
-            "        |> map(fn: (r) => ({provider: r.nome_provedor, mean_latency: r._value_meanLatency, " +
-            "               error_count: r._value_errorCount}))\n" +
-            "        |> sort(columns: [\"error_count\"])\n" +
-            "        |> yield(name: \"ranking\")\n" +
-            "}\n" +
-            "ranking()";
     }
 }
