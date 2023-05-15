@@ -23,7 +23,6 @@ public class Orquestrador
     private string ProvedorSelecionado { get; set; }
 
     public Orquestrador(
-        ILogger<Orquestrador> logger,
         IConfiguration configuration,
         MetricasDao metricasDao)
     {
