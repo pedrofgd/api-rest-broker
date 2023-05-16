@@ -10,11 +10,12 @@ public class ProvedoresCepFakeHandler
     {
         await ForcarDelay();
         
-        var sla = SomeInt(100);
-        if (sla > 90)
-            throw new Exception();
-        if (sla > 80)
-            return Results.BadRequest();
+        // todo: remover
+        // var sla = SomeInt(100);
+        // if (sla > 90)
+        //     throw new Exception();
+        // if (sla > 80)
+        //     return Results.BadRequest();
 
         var completude = SomeInt(100);
         return Results.Ok(new
@@ -49,11 +50,12 @@ public class ProvedoresCepFakeHandler
     {
         await ForcarDelay();
         
-        var sla = SomeInt(100);
-        if (sla > 90)
-            throw new Exception();
-        if (sla > 80)
-            return Results.BadRequest();
+        // todo: remover
+        // var sla = SomeInt(100);
+        // if (sla > 90)
+        //     throw new Exception();
+        // if (sla > 80)
+            // return Results.BadRequest();
         
         var completude = SomeInt(100);
         return Results.Ok(new
@@ -75,11 +77,12 @@ public class ProvedoresCepFakeHandler
     {
         await ForcarDelay();
         
-        var sla = SomeInt(100);
-        if (sla > 90)
-            throw new Exception();
-        if (sla > 80)
-            return Results.BadRequest();
+        // todo: remover
+        // var sla = SomeInt(100);
+        // if (sla > 90)
+        //     throw new Exception();
+        // if (sla > 80)
+        //     return Results.BadRequest();
         
         var completude = SomeInt(100);
         return Results.Ok(new

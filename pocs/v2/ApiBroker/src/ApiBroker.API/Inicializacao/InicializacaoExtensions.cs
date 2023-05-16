@@ -3,11 +3,11 @@ namespace ApiBroker.API.Inicializacao;
 public static class InicializacaoExtensions
 {
     public static void UseInicializador(this WebApplication app, IConfiguration configuration, 
-        bool check = true)
+        IServiceScopeFactory serviceScopeFactory, bool check = true)
     {
         app.Lifetime.ApplicationStarted.Register(() =>
         {
-            var inicializador = new Inicializador(configuration);
+            var inicializador = new Inicializador(configuration, serviceScopeFactory);
             inicializador.Iniciar(check);
         });
     }

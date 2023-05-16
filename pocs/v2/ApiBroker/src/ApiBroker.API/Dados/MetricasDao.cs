@@ -1,17 +1,11 @@
 using InfluxDB.Client.Api.Domain;
 using InfluxDB.Client.Writes;
+using Serilog;
 
 namespace ApiBroker.API.Dados;
 
 public class MetricasDao
 {
-    private readonly ILogger<MetricasDao> _logger;
-
-    public MetricasDao()
-    {
-        _logger = LoggerFactory.Factory().CreateLogger<MetricasDao>();
-    }
-    
     public void LogRespostaProvedor(LogRespostaProvedorDto logRespostaProvedorDto, IConfiguration configuration)
     {
         try
@@ -19,7 +13,7 @@ public class MetricasDao
             using var influx = InfluxDbClientFactory.OpenConnection(configuration);
             var writeApi = influx.GetWriteApi();
             
-            _logger.LogInformation("Registrando log da resposta do provedor {NomeRecurso}/{NomeProvedor}", 
+            Log.Information("Registrando log da resposta do provedor {NomeRecurso}/{NomeProvedor}", 
                 logRespostaProvedorDto.NomeRecurso, logRespostaProvedorDto.NomeProvedor);
 
             var point = PointData.Measurement("metricas_recursos")
@@ -34,7 +28,7 @@ public class MetricasDao
         }
         catch (Exception e)
         {
-            _logger.LogWarning("Erro ao registrar log da resposta do provedor no InfluxDB. Erro: {MensagemErro}", e.Message);
+            Log.Warning("Erro ao registrar log da resposta do provedor no InfluxDB. Erro: {MensagemErro}", e.Message);
             throw;
         }
     }
@@ -46,7 +40,7 @@ public class MetricasDao
             using var influx = InfluxDbClientFactory.OpenConnection(configuration);
             var writeApi = influx.GetWriteApi();
             
-            _logger.LogInformation("Registrando log de performance do Broker para resposta a chamada no recurso {NomeRecurso}", 
+            Log.Information("Registrando log de performance do Broker para resposta a chamada no recurso {NomeRecurso}", 
                 logPerformanceBrokerDto.NomeRecurso);
 
             var point = PointData.Measurement("performance_broker")
@@ -62,7 +56,7 @@ public class MetricasDao
         }
         catch (Exception e)
         {
-            _logger.LogWarning(
+            Log.Warning(
                 "Erro ao registrar log de performance do Broker no InfluxDB para resposta a chamada no recurso {NomeRecurso}. " +
                 "Erro: {MensagemErro}", logPerformanceBrokerDto.NomeRecurso, e.Message);
             throw;
@@ -73,7 +67,7 @@ public class MetricasDao
     {
         try
         {
-            _logger.LogInformation("Consultando base de monitoramento para obter os dados dos provedores");
+            Log.Information("Consultando base de monitoramento para obter os dados dos provedores");
             
             using var influx = InfluxDbClientFactory.OpenConnection(configuration);
             var queryApi = influx.GetQueryApi();
@@ -82,14 +76,14 @@ public class MetricasDao
             var query =
                 "ranking = () => {\n" +
                 "    meanLatency = from(bucket: \"logs\")\n" +
-                "        |> range(start: -5s)\n" + // todo: testando
+                "        |> range(start: -5m)\n" + // todo: testando
                 "        |> filter(fn: (r) => r[\"_measurement\"] == \"metricas_recursos\")\n" +
                 $"       |> filter(fn: (r) => r[\"nome_recurso\"] == \"{nomeRecurso}\")\n" +
                 "        |> filter(fn: (r) => r[\"_field\"] == \"latencia\")\n" +
                 "        |> group(columns: [\"nome_provedor\"])\n" +
                 "        |> mean()\n" +
                 "    errorCount = from(bucket: \"logs\")\n" +
-                "        |> range(start: -5s)\n" + // todo: testando
+                "        |> range(start: -5m)\n" + // todo: testando
                 "        |> filter(fn: (r) => r[\"_measurement\"] == \"metricas_recursos\")\n" +
                 "        |> filter(fn: (r) => r[\"_field\"] == \"sucesso\")\n" +
                 $"       |> filter(fn: (r) => r[\"nome_recurso\"] == \"{nomeRecurso}\")\n" +
@@ -120,7 +114,7 @@ public class MetricasDao
                 ? string.Join(",", provedores.Select(p => (string)p["name"]))
                 : "0";
 
-            _logger.LogInformation(
+            Log.Information(
                 "Base de monitoramento retornou os provedores para o recurso '{NomeRecurso}'. " +
                 "Provedores: {ProvedoresDisponiveis}",
                 nomeRecurso, listaProvedoresDisponiveis
@@ -130,7 +124,7 @@ public class MetricasDao
         }
         catch (Exception)
         {
-            _logger.LogWarning("Erro ao obter dados de provedores no InfluxDB");
+            Log.Warning("Erro ao obter dados de provedores no InfluxDB");
             throw;
         }
     }

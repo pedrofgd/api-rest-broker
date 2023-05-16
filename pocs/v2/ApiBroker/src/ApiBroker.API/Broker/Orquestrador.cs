@@ -8,15 +8,16 @@ using ApiBroker.API.Requisicao;
 using ApiBroker.API.Validacao;
 using ApiBroker.API.WebSocket;
 using Microsoft.AspNetCore.SignalR;
+using Serilog;
 
 namespace ApiBroker.API.Broker;
 
 public class Orquestrador
 {
-    private readonly ILogger<Orquestrador> _logger;
     private readonly IConfiguration _configuration;
     private readonly MetricasDao _metricasDao;
-    
+    private readonly Requisitor _requisitor;
+
     private bool SucessoNaRequisicao { get; set; }
     private int QtdeProvedoresTentados { get; set; }
     private long TempoTotalRespostaProvedores { get; set; }
@@ -24,11 +25,12 @@ public class Orquestrador
 
     public Orquestrador(
         IConfiguration configuration,
-        MetricasDao metricasDao)
+        MetricasDao metricasDao,
+        Requisitor requisitor)
     {
-        _logger = LoggerFactory.Factory().CreateLogger<Orquestrador>();
         _configuration = configuration;
         _metricasDao = metricasDao;
+        _requisitor = requisitor;
 
         SucessoNaRequisicao = false;
         QtdeProvedoresTentados = 0;
@@ -41,12 +43,12 @@ public class Orquestrador
         var watch = Stopwatch.StartNew();
         
         var path = context.Request.Path;
-        _logger.LogInformation("Requisição recebida em {Path}", path);
+        Log.Information("Requisição recebida em {Path}", path);
         
         var solicitacao = ObterRecursoSolicitado(path);
         if (solicitacao is null)
         {
-            _logger.LogWarning("Erro ao obter todos os detalhes da solicitação. A requisição será encerrada");
+            Log.Warning("Erro ao obter todos os detalhes da solicitação. A requisição será encerrada");
             context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
             return;
         }
@@ -57,32 +59,31 @@ public class Orquestrador
         var listaProvedores = await ObterOrdemMelhoresProvedores(solicitacao);
         if (listaProvedores is null || !listaProvedores.Any())
         {
-            _logger.LogWarning("Não há provedores disponíveis para atender a requisição");
+            Log.Warning("Não há provedores disponíveis para atender a requisição");
             // todo: retornar erro quando não houver provedores que atendam aos critérios, por enquanto (nas próximas versões, talvez seja melhor enviar para qualquer um)
             context.Response.StatusCode = (int)HttpStatusCode.ServiceUnavailable;
             return;
         }
         
-        _logger.LogInformation("Requisição pronta para ser enviada ao provedor");
+        Log.Information("Requisição pronta para ser enviada ao provedor");
         foreach (var provedor in listaProvedores)
         {
-            _logger.LogInformation("Iniciando tentativa no provedor {NomeRecurso}/{NomeProvedir}", 
+            Log.Information("Iniciando tentativa no provedor {NomeRecurso}/{NomeProvedir}", 
                 solicitacao.NomeRecurso, provedor);
             QtdeProvedoresTentados++;
             
             var provedorAlvo = ObterDadosProvedorAlvo(solicitacao.NomeRecurso, provedor);
             if (provedorAlvo is null)
             {
-                _logger.LogWarning("Configurações incorretas para o provedor com nome: {NomeProvedor}", provedor);
+                Log.Warning("Configurações incorretas para o provedor com nome: {NomeProvedor}", provedor);
                 return;
             }
 
-            _logger.LogInformation("Chamando {NomeProvedor}", provedorAlvo.Nome);
+            Log.Information("Chamando {NomeProvedor}", provedorAlvo.Nome);
 
             var requisicao = mapeador.MapearRequisicao(context, solicitacao, provedorAlvo);
-
-            var requisitor = new Requisitor();
-            var (respostaProvedor, tempoRespostaMs) = await requisitor.EnviarRequisicao(requisicao, 
+            
+            var (respostaProvedor, tempoRespostaMs) = await _requisitor.EnviarRequisicao(requisicao, 
                 provedorAlvo.Nome, solicitacao.NomeRecurso);
             
             LogResultadoProvedor(solicitacao, provedorAlvo, respostaProvedor, tempoRespostaMs);
@@ -90,7 +91,7 @@ public class Orquestrador
             
             if (respostaProvedor is null)
             {
-                _logger.LogWarning("Não foi possível obter resposta no provedor {NomeProvedor}", provedor);
+                Log.Warning("Não foi possível obter resposta no provedor {NomeProvedor}", provedor);
                 continue;
             }
 
@@ -101,12 +102,12 @@ public class Orquestrador
             await NotificarUi(context, listaProvedores.ToArray(), provedorAlvo.Nome);
             if (SucessoNaRequisicao)
             {
-                _logger.LogInformation("O provedor {NomeProvedor} atingiu os critérios da requisição", provedor);
+                Log.Information("O provedor {NomeProvedor} atingiu os critérios da requisição", provedor);
                 ProvedorSelecionado = provedorAlvo.Nome;
                 break;
             }
             
-            _logger.LogInformation("O provedor não atingiu os critérios");
+            Log.Information("O provedor não atingiu os critérios");
         }
         
         watch.Stop();
@@ -191,13 +192,13 @@ public class Orquestrador
     private async Task NotificarUi(HttpContext context, string[] provedoresDisponiveis, string provedorAlvo)
     {
         var watch = Stopwatch.StartNew();
-        _logger.LogInformation("Notificando UI antes de retornar resposta ao cliente...");
+        Log.Information("Notificando UI antes de retornar resposta ao cliente...");
         
         var ranqueamentoHub = context.RequestServices.GetRequiredService<IHubContext<RanqueamentoHub>>();
         await ranqueamentoHub.Clients.All.SendAsync("ReceiveMessage", provedoresDisponiveis, provedorAlvo);
         
         watch.Stop();
-        _logger.LogInformation(
+        Log.Information(
             "UI notificada com sucesso. ElapsedMilliseconds: {ElapsedMilliseconds}",
             watch.ElapsedMilliseconds);
     }

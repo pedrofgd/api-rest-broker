@@ -1,14 +1,15 @@
 using System.Diagnostics;
+using Serilog;
 
 namespace ApiBroker.API.Requisicao;
 
 public class Requisitor
 {
-    private readonly ILogger<Requisitor> _logger;
-    
-    public Requisitor()
+    private readonly IHttpClientFactory _httpClientFactory;
+
+    public Requisitor(IHttpClientFactory httpClientFactory)
     {
-        _logger = LoggerFactory.Factory().CreateLogger<Requisitor>();
+        _httpClientFactory = httpClientFactory;
     }
     
     public async Task<Tuple<HttpResponseMessage, long>> EnviarRequisicao(HttpRequestMessage requisicao, 
@@ -18,18 +19,18 @@ public class Requisitor
         
         try
         {
-            using var httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(2) };
+            using var httpClient = _httpClientFactory.CreateClient("Requisitor");
             
-            _logger.LogInformation("Enviando requisição para {Url}", requisicao.RequestUri);
+            Log.Information("Enviando requisição para {Url}", requisicao.RequestUri);
             var resultado = await httpClient.SendAsync(requisicao);
 
-            _logger.LogInformation("Requisição realizada no provedor {NomeRecurso}/{NomeProvedor}", 
+            Log.Information("Requisição realizada no provedor {NomeRecurso}/{NomeProvedor}", 
                 nomeRecurso, nomeProvedorAlvo);
             return new Tuple<HttpResponseMessage, long>(resultado, watch.ElapsedMilliseconds);
         }
         catch (Exception e)
         {
-            _logger.LogError(
+            Log.Error(
                 "Erro ao enviar requisição para {NomeRecurso}/{NomeProvedor}. Erro: {MensagemErro}",
                 nomeRecurso, nomeProvedorAlvo, e
             );
