@@ -59,7 +59,7 @@ public class Healthchecker
     private void LogResultado(string nomeRecurso, ProvedorSettings provedor,
         HttpResponseMessage resultadoCheck, long tempoRespostaMs, IConfiguration configuration)
     {
-        var monitorador = new MetricasDao();
+        var monitorador = new MetricasDao(configuration);
         var logDto = new LogRespostaProvedorDto
         {
             NomeRecurso = nomeRecurso,
@@ -68,6 +68,6 @@ public class Healthchecker
             Sucesso = resultadoCheck.IsSuccessStatusCode,
             Origem = "Healthcheck"
         };
-        monitorador.LogRespostaProvedor(logDto, configuration);
+        monitorador.LogRespostaProvedor(logDto);
     }
 }

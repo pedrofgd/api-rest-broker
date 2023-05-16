@@ -6,6 +6,13 @@ namespace ApiBroker.API.Ranqueamento;
 
 public class Ranqueador
 {
+    private readonly MetricasDao _metricasDao;
+
+    public Ranqueador(MetricasDao metricasDao)
+    {
+        _metricasDao = metricasDao;
+    }
+    
     public async Task<List<string>> ObterOrdemMelhoresProvedores(SolicitacaoDto solicitacao, IConfiguration configuration)
     {
         Log.Information("Iniciando processo para obter ordem dos provedores");
@@ -31,8 +38,7 @@ public class Ranqueador
 
     private async Task<List<Dictionary<string, object>>> ObterTodosProvedores(string nomeRecurso, IConfiguration configuration)
     {
-        var metricasDao = new MetricasDao();
-        return await metricasDao.ObterDadosProvedores(nomeRecurso, configuration);
+        return await _metricasDao.ObterDadosProvedores(nomeRecurso);
     }
 
 }

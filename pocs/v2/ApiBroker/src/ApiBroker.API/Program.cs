@@ -1,7 +1,7 @@
-using System.Net.Quic;
 using ApiBroker.API.Broker;
 using ApiBroker.API.Dados;
 using ApiBroker.API.Inicializacao;
+using ApiBroker.API.Ranqueamento;
 using ApiBroker.API.Requisicao;
 using ApiBroker.API.TestHelpers;
 using ApiBroker.API.WebSocket;
@@ -19,6 +19,7 @@ Log.Information("Iniciando Broker...");
 builder.Services.AddScoped<Orquestrador>();
 builder.Services.AddScoped<MetricasDao>();
 builder.Services.AddScoped<Requisitor>();
+builder.Services.AddScoped<Ranqueador>();
 builder.Services.AddWebSocket(configuration);
 
 builder.Services.AddHttpClient("Requisitor");
