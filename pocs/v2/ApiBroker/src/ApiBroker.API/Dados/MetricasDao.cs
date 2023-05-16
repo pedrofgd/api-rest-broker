@@ -11,7 +11,7 @@ public class MetricasDao
         try
         {
             using var influx = InfluxDbClientFactory.OpenConnection(configuration);
-            var writeApi = influx.GetWriteApi();
+            var writeApi = influx.GetWriteApiAsync();
             
             Log.Information("Registrando log da resposta do provedor {NomeRecurso}/{NomeProvedor}", 
                 logRespostaProvedorDto.NomeRecurso, logRespostaProvedorDto.NomeProvedor);
@@ -24,7 +24,7 @@ public class MetricasDao
                 .Field("sucesso", logRespostaProvedorDto.Sucesso ? 1 : 0)
                 .Timestamp(DateTime.UtcNow, WritePrecision.Ms);
 
-            writeApi.WritePoint(point, "logs", "broker");
+            writeApi.WritePointAsync(point, "logs", "broker");
         }
         catch (Exception e)
         {
@@ -38,7 +38,7 @@ public class MetricasDao
         try
         {
             using var influx = InfluxDbClientFactory.OpenConnection(configuration);
-            var writeApi = influx.GetWriteApi();
+            var writeApi = influx.GetWriteApiAsync();
             
             Log.Information("Registrando log de performance do Broker para resposta a chamada no recurso {NomeRecurso}", 
                 logPerformanceBrokerDto.NomeRecurso);
@@ -52,7 +52,7 @@ public class MetricasDao
                 .Field("retornou_erro_ao_cliente", logPerformanceBrokerDto.RetornouErroAoCliente)
                 .Timestamp(DateTime.UtcNow, WritePrecision.Ms);
 
-            writeApi.WritePoint(point, "logs", "broker");
+            writeApi.WritePointAsync(point, "logs", "broker");
         }
         catch (Exception e)
         {
