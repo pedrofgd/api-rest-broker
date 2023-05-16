@@ -13,7 +13,7 @@ variable "organization" {
 variable "aws_region" {
   type        = string
   description = "AWS region to use for resources"
-  default     = "us-east-1"
+  default     = "sa-east-1"
 }
 
 variable "vpc_cidr_block" {

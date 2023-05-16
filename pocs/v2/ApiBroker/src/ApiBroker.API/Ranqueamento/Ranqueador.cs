@@ -1,20 +1,14 @@
 using ApiBroker.API.Broker;
 using ApiBroker.API.Dados;
+using Serilog;
 
 namespace ApiBroker.API.Ranqueamento;
 
 public class Ranqueador
 {
-    private readonly ILogger<Ranqueador> _logger;
-
-    public Ranqueador()
-    {
-        _logger = LoggerFactory.Factory().CreateLogger<Ranqueador>();
-    }
-    
     public async Task<List<string>> ObterOrdemMelhoresProvedores(SolicitacaoDto solicitacao, IConfiguration configuration)
     {
-        _logger.LogInformation("Iniciando processo para obter ordem dos provedores");
+        Log.Information("Iniciando processo para obter ordem dos provedores");
         
         var nomeRecurso = solicitacao.NomeRecurso;
 
@@ -27,7 +21,7 @@ public class Ranqueador
             .Select(p => (string)p["name"])
             .ToList();
 
-        _logger.LogInformation(
+        Log.Information(
             "Ordem dos melhores provedores obtida. " +
             "Há {QtdeProvedoresDisponiveis} provedores que atendem os critérios",
             provedoresDisponiveis.Count);

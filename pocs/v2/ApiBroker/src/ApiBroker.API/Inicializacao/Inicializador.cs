@@ -1,19 +1,21 @@
 using ApiBroker.API.Configuracoes;
 using ApiBroker.API.Healthcheck;
+using Serilog;
 
 namespace ApiBroker.API.Inicializacao;
 
 public class Inicializador
 {
-    private readonly ILogger<Inicializador> _logger;
     private readonly IConfiguration _configuration;
+    private readonly IServiceScopeFactory _serviceScopeFactory;
     private readonly List<RecursoSettings> _recursos;
 
-    public Inicializador(IConfiguration configuration)
+    public Inicializador(IConfiguration configuration, IServiceScopeFactory serviceScopeFactory)
     {
-        _logger = LoggerFactory.Factory().CreateLogger<Inicializador>();
         _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
         _recursos = ConfiguracoesUtils.ObterTodosRecursos(configuration) ?? throw new ArgumentNullException(nameof(configuration));
+        
+        _serviceScopeFactory = serviceScopeFactory;
     }
 
     public void Iniciar(bool check)
@@ -24,7 +26,7 @@ public class Inicializador
         }
         catch (Exception)
         {
-            _logger.LogError("Configurações fora do padrão");
+            Log.Error("Configurações fora do padrão");
             throw;
         }
         
@@ -56,7 +58,7 @@ public class Inicializador
         {
             foreach (var provedor in recurso.Provedores.Where(provedor => provedor.Healthcheck != null))
             {
-                _logger.LogInformation(
+                Log.Information(
                     "Inicializando {NomeRecurso}/{NomeProvedor}",
                     recurso.Nome, provedor.Nome);
 
@@ -72,7 +74,7 @@ public class Inicializador
     {
         var healthchecker = new Healthchecker();
 #pragma warning disable CS4014
-        healthchecker.CheckPeriodicamente(nomeRecurso, provedor, _configuration);
+        healthchecker.CheckPeriodicamente(nomeRecurso, provedor, _configuration, _serviceScopeFactory);
 #pragma warning restore CS4014
     }
 }
