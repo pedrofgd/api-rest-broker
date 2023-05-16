@@ -1,17 +1,24 @@
+using InfluxDB.Client;
 using InfluxDB.Client.Api.Domain;
 using InfluxDB.Client.Writes;
 using Serilog;
 
 namespace ApiBroker.API.Dados;
 
-public class MetricasDao
+public class MetricasDao : IDisposable
 {
-    public void LogRespostaProvedor(LogRespostaProvedorDto logRespostaProvedorDto, IConfiguration configuration)
+    private readonly InfluxDBClient _influxDbClient;
+    
+    public MetricasDao(IConfiguration configuration)
+    {
+        _influxDbClient = InfluxDbClientFactory.OpenConnection(configuration);
+    }
+    
+    public void LogRespostaProvedor(LogRespostaProvedorDto logRespostaProvedorDto)
     {
         try
         {
-            using var influx = InfluxDbClientFactory.OpenConnection(configuration);
-            var writeApi = influx.GetWriteApiAsync();
+            var writeApi = _influxDbClient.GetWriteApiAsync();
             
             Log.Information("Registrando log da resposta do provedor {NomeRecurso}/{NomeProvedor}", 
                 logRespostaProvedorDto.NomeRecurso, logRespostaProvedorDto.NomeProvedor);
@@ -33,12 +40,11 @@ public class MetricasDao
         }
     }
 
-    public void LogPerformanceBroker(LogPerformanceBrokerDto logPerformanceBrokerDto, IConfiguration configuration)
+    public void LogPerformanceBroker(LogPerformanceBrokerDto logPerformanceBrokerDto)
     {
         try
         {
-            using var influx = InfluxDbClientFactory.OpenConnection(configuration);
-            var writeApi = influx.GetWriteApiAsync();
+            var writeApi = _influxDbClient.GetWriteApiAsync();
             
             Log.Information("Registrando log de performance do Broker para resposta a chamada no recurso {NomeRecurso}", 
                 logPerformanceBrokerDto.NomeRecurso);
@@ -63,14 +69,13 @@ public class MetricasDao
         }
     }
 
-    public async Task<List<Dictionary<string, object>>> ObterDadosProvedores(string nomeRecurso, IConfiguration configuration)
+    public async Task<List<Dictionary<string, object>>> ObterDadosProvedores(string nomeRecurso)
     {
         try
         {
             Log.Information("Consultando base de monitoramento para obter os dados dos provedores");
             
-            using var influx = InfluxDbClientFactory.OpenConnection(configuration);
-            var queryApi = influx.GetQueryApi();
+            var queryApi = _influxDbClient.GetQueryApi();
             
             // todo: rever range na consulta (talvez ser parte da configuração do cliente)
             var query =
@@ -127,5 +132,10 @@ public class MetricasDao
             Log.Warning("Erro ao obter dados de provedores no InfluxDB");
             throw;
         }
+    }
+
+    public void Dispose()
+    {
+        _influxDbClient?.Dispose();
     }
 }

@@ -17,6 +17,7 @@ public class Orquestrador
     private readonly IConfiguration _configuration;
     private readonly MetricasDao _metricasDao;
     private readonly Requisitor _requisitor;
+    private readonly Ranqueador _ranqueador;
 
     private bool SucessoNaRequisicao { get; set; }
     private int QtdeProvedoresTentados { get; set; }
@@ -26,11 +27,13 @@ public class Orquestrador
     public Orquestrador(
         IConfiguration configuration,
         MetricasDao metricasDao,
-        Requisitor requisitor)
+        Requisitor requisitor,
+        Ranqueador ranqueador)
     {
         _configuration = configuration;
         _metricasDao = metricasDao;
         _requisitor = requisitor;
+        _ranqueador = ranqueador;
 
         SucessoNaRequisicao = false;
         QtdeProvedoresTentados = 0;
@@ -141,8 +144,7 @@ public class Orquestrador
 
     private async Task<List<string>> ObterOrdemMelhoresProvedores(SolicitacaoDto solicitacao)
     {
-        var ranqueador = new Ranqueador();
-        var todosProvedoresDisponiveis =  await ranqueador.ObterOrdemMelhoresProvedores(solicitacao, _configuration);
+        var todosProvedoresDisponiveis =  await _ranqueador.ObterOrdemMelhoresProvedores(solicitacao, _configuration);
 
         return solicitacao.TentarTodosProvedoresAteSucesso
             ? todosProvedoresDisponiveis
@@ -171,7 +173,7 @@ public class Orquestrador
             Sucesso = respostaProvedor?.IsSuccessStatusCode ?? false,
             Origem = "RequisicaoCliente"
         };
-        _metricasDao.LogRespostaProvedor(logDto, _configuration);
+        _metricasDao.LogRespostaProvedor(logDto);
     }
 
     private void LogPerformanceBroker(string nomeRecurso, string provedorSelecionado,
@@ -186,7 +188,7 @@ public class Orquestrador
             TempoRespostaProvedores = tempoRespostaProvedores,
             TempoRespostaTotal = tempoRespostaTotal
         };
-        _metricasDao.LogPerformanceBroker(logDto, _configuration);
+        _metricasDao.LogPerformanceBroker(logDto);
     }
 
     private async Task NotificarUi(HttpContext context, string[] provedoresDisponiveis, string provedorAlvo)
