@@ -1,11 +1,13 @@
 package com.boker.fakeprovider;
 
+import lombok.extern.log4j.Log4j2;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.DeferredResult;
 
 import java.util.UUID;
 import java.util.concurrent.ForkJoinPool;
 
+@Log4j2
 @RestController
 @RequestMapping("/")
 public class TestContoller {
@@ -16,6 +18,7 @@ public class TestContoller {
 
     @PostMapping("/correios-alt/{cep}")
     public DeferredResult<CorreiosAltDTO> correiosAltTest(@PathVariable String cep) {
+        log.info("INÍCIO REQUISIÇÃO PARA CORREIOS-ALT:: {}",cep);
 //        requests++;
 //        if (requests % REQUEST_CORREIOS_ALT >= REQUEST_CORREIOS_ALT / 2) throw new RuntimeException();
         var result = new DeferredResult<CorreiosAltDTO>();
@@ -46,12 +49,13 @@ public class TestContoller {
                     .build();
             result.setResult(dto);
         });
-
+        log.info("FIM DA REQUISIÇÃO PARA CORREIOS-ALT:: {}",cep);
         return result;
     }
 
     @GetMapping("/via-cep/{cep}")
     public DeferredResult<ViaCepDTO> viaCepTest(@PathVariable String cep) {
+        log.info("INÍCIO REQUISIÇÃO PARA VIA-CEP:: {}",cep);
 //        requests++;
 //        if (requests % REQUEST_VIA_CEP >= REQUEST_VIA_CEP / 2) throw new RuntimeException();
         var result = new DeferredResult<ViaCepDTO>();
@@ -70,12 +74,13 @@ public class TestContoller {
                     .build();
             result.setResult(dto);
         });
-
+        log.info("FIM DA REQUISIÇÃO PARA VIA-CEP:: {}",cep);
         return result;
     }
 
     @GetMapping("/widenet/{cep}")
     public DeferredResult<WidenetDTO> widenetTest(@PathVariable String cep) {
+        log.info("INÍCIO REQUISIÇÃO PARA WIDENET:: {}",cep);
 //        requests++;
 //        if (requests % REQUEST_WIDENET >= REQUEST_WIDENET / 2) throw new RuntimeException();
         var result = new DeferredResult<WidenetDTO>();
@@ -89,7 +94,7 @@ public class TestContoller {
                     .build();
             result.setResult(dto);
         });
-
+        log.info("FIM DA REQUISIÇÃO PARA WIDENET:: {}",cep);
         return result;
     }
 
