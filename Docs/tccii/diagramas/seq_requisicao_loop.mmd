@@ -1,0 +1,30 @@
+%%{init: {'theme':'neutral'}}%%
+
+sequenceDiagram
+    actor Aplicação Cliente
+
+    box Tentar provedores
+    participant Orquestrador
+    participant Validador
+    participant Adapdator de Objetos
+    participant Banco de Dados de Séries Temporais
+    end
+    
+    autonumber
+    Orquestrador ->> Orquestrador:  Seleciona o primeiro provedor da lista
+    loop Enquanto os critérios não forem atingidos e há provedores disponiveis na lista
+        Orquestrador --> Orquestrador: Fazer requisição
+        Orquestrador->>Validador: Verificar se a resposta do provedor atende os critérios
+        Validador->>Orquestrador: Resultado da validação
+        Orquestrador->>Banco de Dados de Séries Temporais: Registra os resultados da validação
+        alt Provedor atendeu aos critérios
+            Orquestrador->>Adapdator de Objetos: Mapear objeto de resposta
+            Adapdator de Objetos->>Orquestrador: Resposta mapeada para o cliente
+            Orquestrador->>Aplicação Cliente: Resposta
+        else Provedor não atendeu aos critérios
+            Orquestrador->>Orquestrador: Tenta próximo provedor da lista 
+        end
+        opt Nenhum dos provedores atingiu aos critérios
+            Orquestrador->>Aplicação Cliente: Erro
+        end
+    end
