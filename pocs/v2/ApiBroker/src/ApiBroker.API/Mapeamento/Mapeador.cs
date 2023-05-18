@@ -1,13 +1,22 @@
+using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
 using ApiBroker.API.Broker;
 using ApiBroker.API.Configuracoes;
+using ApiBroker.API.Dados;
 using Newtonsoft.Json;
 
 namespace ApiBroker.API.Mapeamento;
 
 public class Mapeador
 {
+    private readonly MetricasDao _metricasDao;
+
+    public Mapeador(MetricasDao metricasDao)
+    {
+        _metricasDao = metricasDao;
+    }
+    
     #region Requisicao
 
     /// <summary>
@@ -19,8 +28,15 @@ public class Mapeador
     /// <returns></returns>
     public HttpRequestMessage MapearRequisicao(HttpContext contextoOriginal, SolicitacaoDto solicitacao, ProvedorSettings provedorAlvo)
     {
+        var watch = Stopwatch.StartNew();
+        
         var uri = CriarUriAlvo(provedorAlvo.Rota, solicitacao.ParametrosRota);
-        return CriarRequisicao(contextoOriginal, uri, provedorAlvo);
+        var requisicaoMapeada = CriarRequisicao(contextoOriginal, uri, provedorAlvo);
+        
+        watch.Stop();
+        LogPerformanceCodigo("Requisicao", watch.ElapsedMilliseconds);
+        
+        return requisicaoMapeada;
     }
 
     private Uri CriarUriAlvo(string rota, Dictionary<string, string> parametrosRota)
@@ -98,17 +114,24 @@ public class Mapeador
     /// <returns>Resposta mapeada com base nas configurações do Cliente</returns>
     public RespostaMapeada MapearResposta(HttpResponseMessage respostaProvedor, ProvedorSettings provedorAcionado, string[] camposEsperados)
     {
+        var watch = Stopwatch.StartNew();
+        
         var conteudoMapeado = SubstituirCamposParaCliente(respostaProvedor, provedorAcionado, camposEsperados);
 
         // todo: avaliar incluir parse dos campos também, para tipos especificados pelo cliente
 
         conteudoMapeado["provedor"] =  provedorAcionado.Nome;
 
-        return new RespostaMapeada
+        var respostaMapeada = new RespostaMapeada
         {
             HttpResponseMessage = GerarHttpResponseMessage(conteudoMapeado, respostaProvedor),
             CamposMapeados = conteudoMapeado
         };
+        
+        watch.Stop();
+        LogPerformanceCodigo("Resposta", watch.ElapsedMilliseconds);
+
+        return respostaMapeada;
     }
 
     private Dictionary<string, string> SubstituirCamposParaCliente(HttpResponseMessage respostaProvedor, ProvedorSettings provedor, string[] camposEsperados)
@@ -187,4 +210,14 @@ public class Mapeador
     }
     
     #endregion
+    
+    private void LogPerformanceCodigo(string etapa, long tempoProcessamento)
+    {
+        var logDto = new LogPerformanceCodigoDto
+        {
+            NomeComponente = $"Mapeador-{etapa}",
+            TempoProcessamento = tempoProcessamento
+        };
+        _metricasDao.LogPerformanceCodigo(logDto);
+    }
 }

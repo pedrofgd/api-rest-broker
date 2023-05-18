@@ -44,9 +44,11 @@ public class Inicializador
             {
                 ArgumentException.ThrowIfNullOrEmpty(provedor.Nome);
                 ArgumentException.ThrowIfNullOrEmpty(provedor.Rota);
-                ArgumentNullException.ThrowIfNull(provedor.Healthcheck);
-                ArgumentException.ThrowIfNullOrEmpty(provedor.Healthcheck.RotaHealthcheck);
-                ArgumentNullException.ThrowIfNull(provedor.Healthcheck.IntervaloEmSegundos);
+                if (provedor.Healthcheck != null)
+                {
+                    ArgumentException.ThrowIfNullOrEmpty(provedor.Healthcheck.RotaHealthcheck);
+                    ArgumentNullException.ThrowIfNull(provedor.Healthcheck.IntervaloEmSegundos);
+                }
                 ArgumentNullException.ThrowIfNull(provedor.FormatoResposta);
             }
         }

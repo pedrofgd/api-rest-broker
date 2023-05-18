@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using ApiBroker.API.Dados;
 using Serilog;
 
 namespace ApiBroker.API.Requisicao;
@@ -6,10 +7,14 @@ namespace ApiBroker.API.Requisicao;
 public class Requisitor
 {
     private readonly IHttpClientFactory _httpClientFactory;
+    private readonly MetricasDao _metricasDao;
 
-    public Requisitor(IHttpClientFactory httpClientFactory)
+    public Requisitor(
+        IHttpClientFactory httpClientFactory,
+        MetricasDao metricasDao)
     {
         _httpClientFactory = httpClientFactory;
+        _metricasDao = metricasDao;
     }
     
     public async Task<Tuple<HttpResponseMessage, long>> EnviarRequisicao(HttpRequestMessage requisicao, 
@@ -26,6 +31,9 @@ public class Requisitor
 
             Log.Information("Requisição realizada no provedor {NomeRecurso}/{NomeProvedor}", 
                 nomeRecurso, nomeProvedorAlvo);
+
+            LogPerformanceCodigo(watch.ElapsedMilliseconds);
+            
             return new Tuple<HttpResponseMessage, long>(resultado, watch.ElapsedMilliseconds);
         }
         catch (Exception e)
@@ -34,7 +42,20 @@ public class Requisitor
                 "Erro ao enviar requisição para {NomeRecurso}/{NomeProvedor}. Erro: {MensagemErro}",
                 nomeRecurso, nomeProvedorAlvo, e
             );
+            
+            LogPerformanceCodigo(watch.ElapsedMilliseconds);
+            
             return new Tuple<HttpResponseMessage, long>(null, watch.ElapsedMilliseconds);
         }
+    }
+    
+    private void LogPerformanceCodigo(long tempoProcessamento)
+    {
+        var logDto = new LogPerformanceCodigoDto
+        {
+            NomeComponente = "Requisitor",
+            TempoProcessamento = tempoProcessamento
+        };
+        _metricasDao.LogPerformanceCodigo(logDto);
     }
 }

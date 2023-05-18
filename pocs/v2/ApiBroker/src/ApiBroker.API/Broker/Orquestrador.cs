@@ -18,6 +18,7 @@ public class Orquestrador
     private readonly MetricasDao _metricasDao;
     private readonly Requisitor _requisitor;
     private readonly Ranqueador _ranqueador;
+    private readonly Mapeador _mapeador;
 
     private bool SucessoNaRequisicao { get; set; }
     private int QtdeProvedoresTentados { get; set; }
@@ -26,14 +27,16 @@ public class Orquestrador
 
     public Orquestrador(
         IConfiguration configuration,
-        MetricasDao metricasDao,
+        Ranqueador ranqueador,
+        Mapeador mapeador,
         Requisitor requisitor,
-        Ranqueador ranqueador)
+        MetricasDao metricasDao)
     {
         _configuration = configuration;
         _metricasDao = metricasDao;
         _requisitor = requisitor;
         _ranqueador = ranqueador;
+        _mapeador = mapeador;
 
         SucessoNaRequisicao = false;
         QtdeProvedoresTentados = 0;
@@ -56,7 +59,6 @@ public class Orquestrador
             return;
         }
         
-        var mapeador = new Mapeador();
         RespostaMapeada respostaMapeada = new();
 
         var listaProvedores = await ObterOrdemMelhoresProvedores(solicitacao);
@@ -84,7 +86,7 @@ public class Orquestrador
 
             Log.Information("Chamando {NomeProvedor}", provedorAlvo.Nome);
 
-            var requisicao = mapeador.MapearRequisicao(context, solicitacao, provedorAlvo);
+            var requisicao = _mapeador.MapearRequisicao(context, solicitacao, provedorAlvo);
             
             var (respostaProvedor, tempoRespostaMs) = await _requisitor.EnviarRequisicao(requisicao, 
                 provedorAlvo.Nome, solicitacao.NomeRecurso);
@@ -98,9 +100,9 @@ public class Orquestrador
                 continue;
             }
 
-            respostaMapeada = mapeador.MapearResposta(respostaProvedor, provedorAlvo, solicitacao.CamposResposta);
+            respostaMapeada = _mapeador.MapearResposta(respostaProvedor, provedorAlvo, solicitacao.CamposResposta);
 
-            var validador = new Validador(solicitacao);
+            var validador = new Validador(solicitacao, _metricasDao);
             SucessoNaRequisicao = validador.Validar(respostaMapeada);
             await NotificarUi(context, listaProvedores.ToArray(), provedorAlvo.Nome);
             if (SucessoNaRequisicao)
@@ -112,16 +114,11 @@ public class Orquestrador
             
             Log.Information("O provedor não atingiu os critérios");
         }
-        
-        watch.Stop();
-        LogPerformanceBroker(solicitacao.NomeRecurso, ProvedorSelecionado, QtdeProvedoresTentados,
-            SucessoNaRequisicao, TempoTotalRespostaProvedores, 
-            watch.ElapsedMilliseconds);
-        
+
         if (SucessoNaRequisicao)
         {
             context.Response.StatusCode = (int)respostaMapeada.HttpResponseMessage.StatusCode;
-            mapeador.CopiarHeadersRespostaProvedor(context, respostaMapeada.HttpResponseMessage);
+            _mapeador.CopiarHeadersRespostaProvedor(context, respostaMapeada.HttpResponseMessage);
             await respostaMapeada.HttpResponseMessage.Content.CopyToAsync(context.Response.Body);
         }
         else
@@ -129,6 +126,15 @@ public class Orquestrador
             context.Response.StatusCode = (int)HttpStatusCode.ServiceUnavailable;
             // todo: pendente retornar uma mensagem de erro
         }
+        
+        watch.Stop();
+        LogPerformanceBroker(solicitacao.NomeRecurso, ProvedorSelecionado, QtdeProvedoresTentados,
+            SucessoNaRequisicao, TempoTotalRespostaProvedores, 
+            watch.ElapsedMilliseconds);
+
+        LogPerformanceCodigo(watch.ElapsedMilliseconds);
+        
+        Log.Information("Requisição processada. Pronto para responder");
     }
     
     /// <summary>
@@ -203,5 +209,15 @@ public class Orquestrador
         Log.Information(
             "UI notificada com sucesso. ElapsedMilliseconds: {ElapsedMilliseconds}",
             watch.ElapsedMilliseconds);
+    }
+    
+    private void LogPerformanceCodigo(long tempoProcessamento)
+    {
+        var logDto = new LogPerformanceCodigoDto
+        {
+            NomeComponente = "Orquestrador",
+            TempoProcessamento = tempoProcessamento
+        };
+        _metricasDao.LogPerformanceCodigo(logDto);
     }
 }

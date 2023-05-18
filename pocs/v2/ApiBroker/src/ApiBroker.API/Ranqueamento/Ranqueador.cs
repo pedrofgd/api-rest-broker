@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using ApiBroker.API.Broker;
 using ApiBroker.API.Dados;
 using Serilog;
@@ -15,6 +16,8 @@ public class Ranqueador
     
     public async Task<List<string>> ObterOrdemMelhoresProvedores(SolicitacaoDto solicitacao, IConfiguration configuration)
     {
+        var watch = Stopwatch.StartNew();
+        
         Log.Information("Iniciando processo para obter ordem dos provedores");
         
         var nomeRecurso = solicitacao.NomeRecurso;
@@ -33,6 +36,9 @@ public class Ranqueador
             "Há {QtdeProvedoresDisponiveis} provedores que atendem os critérios",
             provedoresDisponiveis.Count);
 
+        watch.Stop();
+        LogPerformanceCodigo(watch.ElapsedMilliseconds);
+        
         return !provedoresDisponiveis.Any() ? new List<string>() : provedoresDisponiveis;
     }
 
@@ -41,4 +47,13 @@ public class Ranqueador
         return await _metricasDao.ObterDadosProvedores(nomeRecurso);
     }
 
+    private void LogPerformanceCodigo(long tempoProcessamento)
+    {
+        var logDto = new LogPerformanceCodigoDto
+        {
+            NomeComponente = "Ranqueador",
+            TempoProcessamento = tempoProcessamento
+        };
+        _metricasDao.LogPerformanceCodigo(logDto);
+    }
 }
