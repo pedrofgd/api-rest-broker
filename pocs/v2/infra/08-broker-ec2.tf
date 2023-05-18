@@ -6,7 +6,7 @@ resource "aws_network_interface" "broker" {
 }
 
 resource "aws_instance" "broker" {
-  ami           = "ami-0c00453583aaf434e" # Ubuntu Server 22.04 LTS (HVM), SSD Volume Type (64 bits (Arm))
+  ami           = "ami-0bf606f6236128bd0" # Ubuntu Server 20.04 LTS (HVM), SSD Volume Type (64 bits (Arm))
   instance_type = var.default_ec2_instance_type
   key_name      = aws_key_pair.key_pair.key_name
 

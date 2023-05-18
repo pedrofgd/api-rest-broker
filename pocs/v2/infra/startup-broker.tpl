@@ -50,7 +50,7 @@ sudo docker run -d \
   -e Recursos__0__provedores__2__rota=http://${dns_provedor}/widenet/{cep} \
   -e Recursos__0__provedores__2__healthcheck__rotaHealthcheck=http://${dns_provedor}/widenet/01222020 \
   -e PortalSettings__Host=http://portal:3000 \
-  pedrofgd/tcc-broker:v0.1.0
+  pedrofgd/tcc-broker:v0.1.1
 
 echo "Setting up API Broker container..."
 sleep 5
