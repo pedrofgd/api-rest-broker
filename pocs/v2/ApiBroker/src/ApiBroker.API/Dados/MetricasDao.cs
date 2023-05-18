@@ -8,19 +8,19 @@ namespace ApiBroker.API.Dados;
 public class MetricasDao : IDisposable
 {
     private readonly InfluxDBClient _influxDbClient;
-    
+    private readonly WriteApiAsync _writeApiAsync;
+
     public MetricasDao(IConfiguration configuration)
     {
         _influxDbClient = InfluxDbClientFactory.OpenConnection(configuration);
+        _writeApiAsync = _influxDbClient.GetWriteApiAsync();
     }
     
     public void LogRespostaProvedor(LogRespostaProvedorDto logRespostaProvedorDto)
     {
         try
         {
-            var writeApi = _influxDbClient.GetWriteApiAsync();
-            
-            Log.Information("Registrando log da resposta do provedor {NomeRecurso}/{NomeProvedor}", 
+            Log.Information("Registrando log de métricas da resposta do provedor {NomeRecurso}/{NomeProvedor}", 
                 logRespostaProvedorDto.NomeRecurso, logRespostaProvedorDto.NomeProvedor);
 
             var point = PointData.Measurement("metricas_recursos")
@@ -31,7 +31,10 @@ public class MetricasDao : IDisposable
                 .Field("sucesso", logRespostaProvedorDto.Sucesso ? 1 : 0)
                 .Timestamp(DateTime.UtcNow, WritePrecision.Ms);
 
-            writeApi.WritePointAsync(point, "logs", "broker");
+            _writeApiAsync.WritePointAsync(point, "logs", "broker");
+            
+            Log.Information("Log de métricas da resposta do provedor registrado para a chamada no recurso {NomeRecurso}/{NomeProvedor}",
+                logRespostaProvedorDto.NomeRecurso, logRespostaProvedorDto.NomeProvedor);
         }
         catch (Exception e)
         {
@@ -44,8 +47,6 @@ public class MetricasDao : IDisposable
     {
         try
         {
-            var writeApi = _influxDbClient.GetWriteApiAsync();
-            
             Log.Information("Registrando log de performance do Broker para resposta a chamada no recurso {NomeRecurso}", 
                 logPerformanceBrokerDto.NomeRecurso);
 
@@ -58,13 +59,42 @@ public class MetricasDao : IDisposable
                 .Field("retornou_erro_ao_cliente", logPerformanceBrokerDto.RetornouErroAoCliente)
                 .Timestamp(DateTime.UtcNow, WritePrecision.Ms);
 
-            writeApi.WritePointAsync(point, "logs", "broker");
+            _writeApiAsync.WritePointAsync(point, "logs", "broker");
+            
+            Log.Information("Log de performance do Broker registrado para a chamada no recurso {NomeRecurso}",
+                logPerformanceBrokerDto.NomeRecurso);
         }
         catch (Exception e)
         {
             Log.Warning(
                 "Erro ao registrar log de performance do Broker no InfluxDB para resposta a chamada no recurso {NomeRecurso}. " +
                 "Erro: {MensagemErro}", logPerformanceBrokerDto.NomeRecurso, e.Message);
+            throw;
+        }
+    }
+
+    public void LogPerformanceCodigo(LogPerformanceCodigoDto logPerformanceCodigoDto)
+    {
+        try
+        {
+            Log.Debug("Registrando log de performance do código para o componente {NomeComponente}", 
+                logPerformanceCodigoDto.NomeComponente);
+
+            var point = PointData.Measurement("performance_codigo")
+                .Tag("nome_componente", logPerformanceCodigoDto.NomeComponente)
+                .Field("tempo_processamento", logPerformanceCodigoDto.TempoProcessamento)
+                .Timestamp(DateTime.UtcNow, WritePrecision.Ms);
+
+            _writeApiAsync.WritePointAsync(point, "logs", "broker");
+            
+            Log.Information("Log de performance do código registrado para o componente {NomeComponente}",
+                logPerformanceCodigoDto.NomeComponente);
+        }
+        catch (Exception e)
+        {
+            Log.Warning(
+                "Erro ao registrar log de performance do código no InfluxDB para o componente {NomeComponente}. " +
+                "Erro: {MensagemErro}", logPerformanceCodigoDto.NomeComponente, e.Message);
             throw;
         }
     }
@@ -137,5 +167,6 @@ public class MetricasDao : IDisposable
     public void Dispose()
     {
         _influxDbClient?.Dispose();
+        Log.Information("Conexão com o InfluxDB foi fechada");
     }
 }

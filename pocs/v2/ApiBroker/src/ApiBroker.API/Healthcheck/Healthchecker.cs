@@ -23,10 +23,10 @@ public class Healthchecker
          * todo: disparando o primeiro manualmente, e então agendando os próximos
          *  Confirmar se há outra forma
          */
-        Log.Information("Iniciando check em {NomeRecurso}/{NomeProvedor}", nomeRecurso, provedor.Nome);
+        Log.Debug("Iniciando check em {NomeRecurso}/{NomeProvedor}", nomeRecurso, provedor.Nome);
         await Check(nomeRecurso, provedor, configuration, requisitor);
         
-        Log.Information("Primeiro check finalizado para o {NomeRecurso}/{NomeProvedor}", nomeRecurso, provedor.Nome);
+        Log.Debug("Primeiro check finalizado para o {NomeRecurso}/{NomeProvedor}", nomeRecurso, provedor.Nome);
         
         // Vai executar repetidamente no intervalo configurado no timer
         var intervalo = TimeSpan.FromSeconds(provedor.Healthcheck!.IntervaloEmSegundos);
@@ -46,14 +46,14 @@ public class Healthchecker
         };
         
         // todo: criar outra assinatura para receber o método HTTP e a url
-        Log.Information("Pronto para checkar {NomeRecurso}/{NomeProvedor}", nomeRecurso, provedor.Nome);
+        Log.Debug("Pronto para checkar {NomeRecurso}/{NomeProvedor}", nomeRecurso, provedor.Nome);
         var (resposta, tempoRespostaMs) = await requisitor.EnviarRequisicao(requisicao, provedor.Nome, nomeRecurso);
 
         LogResultado(nomeRecurso, provedor, resposta, tempoRespostaMs, configuration);
 
         var valido = resposta.IsSuccessStatusCode;
         var msg = $"Healthcheck {nomeRecurso}/{provedor.Nome} válido: {valido}";
-        Log.Information(msg);
+        Log.Debug(msg);
     }
 
     private void LogResultado(string nomeRecurso, ProvedorSettings provedor,
