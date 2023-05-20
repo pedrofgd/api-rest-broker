@@ -1,0 +1,21 @@
+%%{init: {'theme':'neutral'}}%%
+
+sequenceDiagram
+    box Fazer requisição
+    participant Orquestrador
+    participant Adapdator de Objetos
+    participant Requisitor
+    participant Provedor
+    end
+    
+    autonumber
+    activate Orquestrador
+    Orquestrador->>+Adapdator de Objetos: Adaptar objeto da requisição<br> para o provedor
+    Adapdator de Objetos-->>-Orquestrador: Requisição adaptada para o provedor
+    Orquestrador->>+Requisitor: Envia a requisição
+    Requisitor->>+Provedor: Enviar a requisição
+    Provedor-->>-Requisitor: Resposta
+    Requisitor-->>-Orquestrador: Resposta
+    Orquestrador->>+Adapdator de Objetos: Adaptar objeto de resposta   
+    Adapdator de Objetos-->>-Orquestrador: Resposta adaptada para o cliente
+    deactivate Orquestrador

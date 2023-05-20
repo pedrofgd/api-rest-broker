@@ -1,0 +1,31 @@
+%%{init: {'theme':'neutral'}}%%
+
+sequenceDiagram
+    actor Aplicação Cliente
+
+    box Tentar realizar requisição
+    participant Orquestrador
+    participant Validador
+    participant Banco de Dados de Séries Temporais as Banco de Dados de<br> Séries Temporais
+    end
+    
+    autonumber
+    Orquestrador ->> Orquestrador:  Seleciona o primeiro provedor da lista
+    activate Orquestrador
+    loop Enquanto os critérios não forem atingidos<br> e há provedores disponiveis na lista
+        Orquestrador ->> Orquestrador: Fazer requisição
+        Orquestrador->>+Validador: Verificar se a resposta do<br> provedor atende os critérios
+        Validador-->>-Orquestrador: Resultado da validação
+        activate Banco de Dados de Séries Temporais
+        Orquestrador-)Banco de Dados de Séries Temporais: Registra os resultados da validação
+        alt Provedor atendeu aos critérios
+            deactivate Banco de Dados de Séries Temporais
+            Orquestrador-->>Aplicação Cliente: Resposta
+        else Provedor não atendeu aos critérios
+            Orquestrador->>Orquestrador: Tenta próximo provedor da lista 
+        end
+        opt Nenhum dos provedores atingiu aos critérios
+            Orquestrador-->>Aplicação Cliente: Erro
+        end
+    end
+    deactivate Orquestrador
