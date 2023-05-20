@@ -1,0 +1,21 @@
+%%{init: {'theme':'neutral'}}%%
+
+sequenceDiagram
+    actor Aplicação Cliente
+
+    box 
+    participant Orquestrador
+    participant Cátalogo de APIs
+    participant Ranqueador
+    end
+    
+    autonumber
+    Aplicação Cliente->>+Orquestrador: Requisitar recurso
+    activate Orquestrador
+    Orquestrador->>+Cátalogo de APIs: Identificar recurso que o cliente quer acessar
+    Cátalogo de APIs-->>-Orquestrador: Recurso e suas implementações
+    Orquestrador ->>+ Ranqueador: Listar provedores do recurso ordenados por disponibilidade
+    Ranqueador -->>- Orquestrador: Lista de provedores
+    Orquestrador ->> Orquestrador: Tentar realizar requisição
+    Orquestrador -->>Aplicação Cliente: Resultado
+    deactivate Orquestrador
