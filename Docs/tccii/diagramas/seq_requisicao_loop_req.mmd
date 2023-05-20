@@ -1,0 +1,19 @@
+%%{init: {'theme':'neutral'}}%%
+
+sequenceDiagram
+    actor Aplicação Cliente
+
+    box Fazer requisição
+    participant Orquestrador
+    participant Adapdator de Objetos
+    participant Requisitor
+    participant Provedor
+    end
+    
+    autonumber
+    Orquestrador->>Adapdator de Objetos: Mapear objeto da requisição para o provedor
+    Adapdator de Objetos->>Orquestrador: Requisição mapeada para o provedor
+    Orquestrador->>Requisitor: Envia a requisição
+    Requisitor->>Provedor: Envia a requisição
+    Provedor->>Requisitor: Resposta
+    Requisitor->>Orquestrador: Resposta

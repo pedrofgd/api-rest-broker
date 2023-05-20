@@ -4,7 +4,7 @@ sequenceDiagram
     actor Cliente
 
     box Broker para API REST
-    participant Broker
+    participant Orquestrador
     participant Configurações
     participant Ranqueador
     participant Monitoramento
@@ -15,36 +15,7 @@ sequenceDiagram
     end
     
     autonumber
-    Cliente->>Broker: Enviar request para o provedor
-    Broker->>Configurações: Identificar recurso que o cliente quer acessar
-    Configurações->>Broker: Configurações do recurso
-    loop Enquanto os critérios não forem atingidos
-        Broker->>Ranqueador: Obter provedor ativo para o recurso
-        Ranqueador->>Monitoramento: Obter lista ordenada dos provedores para<br> o recurso com base nos critérios configurados
-        Monitoramento->>Ranqueador: Lista de provedores para o recurso
-        Ranqueador->>Broker: Primeiro provedor da lista
-        Broker->>Mapeador: Mapear objeto da requisição para o provedor
-        Mapeador->>Configurações: Obter configurações da requisição do provedor ativo
-        Configurações->>Mapeador: Configurações do provedor
-        Mapeador->>Broker: Requisição mapeada para o provedor
-        Broker->>Requisitor: Envia a requisição
-        Requisitor->>Provedor: Envia a requisição
-        Provedor->>Requisitor: Resposta
-        Requisitor->>Broker: Resposta
-        Broker->>Validador: Verificar se a resposta do provedor atende os critérios
-        Validador->>Configurações: Obter critérios do recurso solicitado
-        Configurações->>Validador: Critérios
-        Validador->>Broker: Resultado da validação
-        Broker->>Monitoramento: Registra os resultados da validação
-        alt Provedor atendeu aos critérios
-            Broker->>Mapeador: Mapear objeto de resposta
-            Mapeador->>Configurações: Obter configurações da resposta do recurso solicitado
-            Mapeador->>Broker: Resposta mapeada para o cliente
-            Broker->>Cliente: Resposta
-        else Provedor não atendeu aos critérios
-            Broker->>Broker: Tenta próximo provedor da lista 
-        end
-        opt Nenhum dos provedores atingiu aos critérios
-            Broker->>Cliente: Erro
-        end
-    end
+    Cliente->>Orquestrador: Enviar request para o provedor
+    Orquestrador->>Configurações: Identificar recurso que o cliente quer acessar
+    Configurações->>Orquestrador: Configurações do recurso
+    Orquestrador ->> Orquestrador: Tentar provedores
