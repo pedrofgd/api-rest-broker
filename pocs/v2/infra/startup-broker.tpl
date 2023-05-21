@@ -19,12 +19,12 @@ sudo docker run -d \
   -p 80:80\
   -e InfluxDbSettings__Url=http://${dns_influx}:8086 \
   -e InfluxDbSettings__Token=${token_influx} \
-  -e Recursos__0__provedores__0__rota=http://${dns_provedor}/correios-alt/{cep} \
-  -e Recursos__0__provedores__0__healthcheck__rotaHealthcheck=http://${dns_provedor}/correios-alt/01222020 \
-  -e Recursos__0__provedores__1__rota=http://${dns_provedor}/via-cep/{cep} \
-  -e Recursos__0__provedores__1__healthcheck__rotaHealthcheck=http://${dns_provedor}/via-cep/01222020 \
-  -e Recursos__0__provedores__2__rota=http://${dns_provedor}/widenet/{cep} \
-  -e Recursos__0__provedores__2__healthcheck__rotaHealthcheck=http://${dns_provedor}/widenet/01222020 \
+  -e Recursos__0__provedores__0__rota=http://${dns_provedor[0].public_dns}/correios-alt/{cep} \
+  -e Recursos__0__provedores__0__healthcheck__rotaHealthcheck=http://${dns_provedor[0].public_dns}/correios-alt/01222020 \
+  -e Recursos__0__provedores__1__rota=http://${dns_provedor[1].public_dns}/via-cep/{cep} \
+  -e Recursos__0__provedores__1__healthcheck__rotaHealthcheck=http://${dns_provedor[1].public_dns}/via-cep/01222020 \
+  -e Recursos__0__provedores__2__rota=http://${dns_provedor[2].public_dns}/widenet/{cep} \
+  -e Recursos__0__provedores__2__healthcheck__rotaHealthcheck=http://${dns_provedor[2].public_dns}/widenet/01222020 \
   -e PortalSettings__Host=http://portal:3000 \
   pedrofgd/tcc-broker:v0.1.1
 

@@ -16,7 +16,7 @@ resource "aws_instance" "broker" {
   }
 
   user_data = templatefile("${path.module}/startup-broker.tpl", {
-    dns_provedor = aws_instance.provedor.public_dns,
+    dns_provedor = aws_instance.provedor,
     dns_influx = aws_instance.influx.public_dns,
     token_influx = var.influx_admin_token
   })
