@@ -15,7 +15,9 @@ resource "aws_instance" "influx" {
     device_index         = 0
   }
 
-  user_data = templatefile("${path.module}/startup-influx.tpl",{})
+  user_data = templatefile("${path.module}/startup-influx.tpl",{
+    token_influx = var.influx_admin_token
+  })
 
   tags = local.common_tags
 }

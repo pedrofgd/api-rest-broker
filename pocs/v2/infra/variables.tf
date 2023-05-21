@@ -33,3 +33,9 @@ variable "default_ec2_instance_type" {
   description = "Type for Broker EC2 instance"
   default     = "t4g.small"
 }
+
+variable "influx_admin_token" {
+  type        = string
+  description = "Token for influx authentication"
+  default     = "-xL0ApHhq7BsvcSOR-eYWMEjnp-_o04dXtRomLN9zTpZs2wsf69hdICMx5sXyUhJAqhLM5LmB__aUvuyUw2oyA=="
+}

@@ -7,15 +7,6 @@ sudo systemctl start docker.service
 
 sudo docker info
 
-# Rede para habilitar comunicação entre os container do broker
-echo "Creating docker network..."
-sudo docker network create tcc-network
-
-# Obter token de acesso do InfluxDB
-echo "Getting influx access token..."
-$INFLUX_ACCESS_TOKEN = -xL0ApHhq7BsvcSOR-eYWMEjnp-_o04dXtRomLN9zTpZs2wsf69hdICMx5sXyUhJAqhLM5LmB__aUvuyUw2oyA==
-echo "Influx access token $INFLUX_ACCESS_TOKEN"
-
 echo "Creating API Broker container..."
 
 # Aguardar um pouco para o provedor também ser inicializado
@@ -25,10 +16,9 @@ sleep 60
 
 sudo docker run -d \
   --name=broker \
-  --network=tcc-network \
   -p 80:80\
   -e InfluxDbSettings__Url=http://${dns_influx}:8086 \
-  -e InfluxDbSettings__Token=$INFLUX_ACCESS_TOKEN \
+  -e InfluxDbSettings__Token=${token_influx} \
   -e Recursos__0__provedores__0__rota=http://${dns_provedor}/correios-alt/{cep} \
   -e Recursos__0__provedores__0__healthcheck__rotaHealthcheck=http://${dns_provedor}/correios-alt/01222020 \
   -e Recursos__0__provedores__1__rota=http://${dns_provedor}/via-cep/{cep} \
