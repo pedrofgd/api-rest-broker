@@ -7,7 +7,7 @@ export const options = {
   ]
 };
 
-const brokerURL = "http://localhost:5070/api/cep-promise/01222020";
+const brokerURL = "http://localhost:5070/api/cep-java/01222020";
 
 export default () => {
   
@@ -16,8 +16,6 @@ export default () => {
     const checkRes = check(res, {
       'status is 200': (r) => r.status === 200,
     });
-
-    sleep(2)
   });
 };
 
