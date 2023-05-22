@@ -2,49 +2,46 @@ using System.Diagnostics;
 using ApiBroker.API.Broker;
 using ApiBroker.API.Dados;
 using Serilog;
+using StackExchange.Redis;
 
 namespace ApiBroker.API.Ranqueamento;
 
 public class Ranqueador
 {
     private readonly MetricasDao _metricasDao;
+    private readonly IConnectionMultiplexer _redis;
+    private readonly IDatabase _redisDb;
 
-    public Ranqueador(MetricasDao metricasDao)
+    public Ranqueador(
+        MetricasDao metricasDao,
+        IConnectionMultiplexer redis)
     {
         _metricasDao = metricasDao;
+        _redis = redis;
+        _redisDb = redis.GetDatabase();
     }
     
-    public async Task<List<string>> ObterOrdemMelhoresProvedores(SolicitacaoDto solicitacao, IConfiguration configuration)
+    public async Task<List<string>> ObterOrdemMelhoresProvedores(SolicitacaoDto solicitacao)
     {
         var watch = Stopwatch.StartNew();
         
         Log.Information("Iniciando processo para obter ordem dos provedores");
+
+        var provedoresDisponiveis =
+            await _redisDb.SortedSetRangeByScoreAsync(solicitacao.NomeRecurso, 
+                order: Order.Descending);
         
-        var nomeRecurso = solicitacao.NomeRecurso;
-
-        var provedores = await ObterTodosProvedores(nomeRecurso, configuration);
-
-        var criterios = solicitacao.Criterios;
-        var provedoresDisponiveis = provedores
-            .Where(x => (int)x["error_rate"] < criterios.ErrorBudgetHora)
-            .OrderBy(x => x["response_time"])
-            .Select(p => (string)p["name"])
-            .ToList();
+        var ordemProvedores = provedoresDisponiveis
+            .Select(provedor => provedor.ToString()).ToList();
 
         Log.Information(
-            "Ordem dos melhores provedores obtida. " +
-            "Há {QtdeProvedoresDisponiveis} provedores que atendem os critérios",
-            provedoresDisponiveis.Count);
-
+            "Ordem dos melhores provedores obtida: {OrdemProvedores}",
+            string.Join(",", ordemProvedores));
+        
         watch.Stop();
         LogPerformanceCodigo(watch.ElapsedMilliseconds);
-        
-        return !provedoresDisponiveis.Any() ? new List<string>() : provedoresDisponiveis;
-    }
 
-    private async Task<List<Dictionary<string, object>>> ObterTodosProvedores(string nomeRecurso, IConfiguration configuration)
-    {
-        return await _metricasDao.ObterDadosProvedores(nomeRecurso);
+        return !provedoresDisponiveis.Any() ? new List<string>() : ordemProvedores;
     }
 
     private void LogPerformanceCodigo(long tempoProcessamento)
