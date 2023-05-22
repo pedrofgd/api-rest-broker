@@ -1,0 +1,28 @@
+// Esse script deve:
+// Contar a quantidade de erros do servidor
+// Disparar um alerta critico caso a quantidade de erros seja maior que threshold
+// Disparar alerta para recuperação do provedor quando o healthcheck identificar que o provedor está respondendo com sucesso
+
+// Avaliar:
+// Considerar a média erros no período
+// Colocar mensagem com descrição do alerta (atualmente não estou conseguindo separar o conteúdo da mensagem por level do alerta, só considera a última mensgaem definida para todos os levels)
+
+var threshold = 2
+
+var data = stream
+    |from()
+        .measurement('performance_influx')
+    |groupBy('nome_recurso', 'nome_provedor')
+data
+    |stateCount(lambda: "sucesso" == 0) // Contagens de erros retornados pelo provedor em um recurso
+        .as('consecutive_error')
+    |alert()
+        .id('status_provedor_{{ index .Tags "nome_recurso" }}{{ index .Tags "nome_provedor" }}')
+        .details('The past {{ index .Fields "consecutive_error" }} requests for "nome_recurso": {{ index .Tags "nome_recurso" }} and "nome_provedor": {{ index .Tags "nome_provedor" }} were considered to change to this level alert.')
+        .info(lambda: "sucesso" == 1)
+        .crit(lambda: "consecutive_error" >= threshold)
+        .log('/var/log/kapacitor/alerts-errors.log')
+        .post('http://host.docker.internal:5073/webhook')
+            .skipSSLVerification()
+        .stateChangesOnly()
+        .noRecoveries() // Preventing OK-level alerts
