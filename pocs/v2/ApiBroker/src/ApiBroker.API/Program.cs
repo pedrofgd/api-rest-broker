@@ -24,6 +24,9 @@ builder.Services.AddScoped<Requisitor>();
 builder.Services.AddSingleton<MetricasDao>();
 builder.Services.AddWebSocket(configuration);
 
+builder.Services.AddControllers();
+builder.Services.AddRedis(configuration);
+
 builder.Services.AddHttpClient("Requisitor");
 
 #region Para testes durante a PoC
@@ -46,5 +49,6 @@ app.UseHealthcheckFake();
 #endregion
 
 app.UseHttpsRedirection();
+app.MapControllers();
 
 app.Run();

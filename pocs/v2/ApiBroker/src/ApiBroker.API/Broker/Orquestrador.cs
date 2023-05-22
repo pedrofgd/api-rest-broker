@@ -150,7 +150,7 @@ public class Orquestrador
 
     private async Task<List<string>> ObterOrdemMelhoresProvedores(SolicitacaoDto solicitacao)
     {
-        var todosProvedoresDisponiveis =  await _ranqueador.ObterOrdemMelhoresProvedores(solicitacao, _configuration);
+        var todosProvedoresDisponiveis =  await _ranqueador.ObterOrdemMelhoresProvedores(solicitacao);
 
         return solicitacao.TentarTodosProvedoresAteSucesso
             ? todosProvedoresDisponiveis

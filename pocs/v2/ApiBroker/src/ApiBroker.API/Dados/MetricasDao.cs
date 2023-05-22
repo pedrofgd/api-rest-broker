@@ -10,6 +10,7 @@ public class MetricasDao : IDisposable
     private readonly InfluxDBClient _influxDbClient;
     private readonly WriteApiAsync _writeApiAsync;
 
+    // todo: mudar o nome, já que vai ficar só log
     public MetricasDao(IConfiguration configuration)
     {
         _influxDbClient = InfluxDbClientFactory.OpenConnection(configuration);
@@ -95,71 +96,6 @@ public class MetricasDao : IDisposable
             Log.Warning(
                 "Erro ao registrar log de performance do código no InfluxDB para o componente {NomeComponente}. " +
                 "Erro: {MensagemErro}", logPerformanceCodigoDto.NomeComponente, e.Message);
-            throw;
-        }
-    }
-
-    public async Task<List<Dictionary<string, object>>> ObterDadosProvedores(string nomeRecurso)
-    {
-        try
-        {
-            Log.Information("Consultando base de monitoramento para obter os dados dos provedores");
-            
-            var queryApi = _influxDbClient.GetQueryApi();
-            
-            // todo: rever range na consulta (talvez ser parte da configuração do cliente)
-            var query =
-                "ranking = () => {\n" +
-                "    meanLatency = from(bucket: \"logs\")\n" +
-                "        |> range(start: -5m)\n" + // todo: testando
-                "        |> filter(fn: (r) => r[\"_measurement\"] == \"metricas_recursos\")\n" +
-                $"       |> filter(fn: (r) => r[\"nome_recurso\"] == \"{nomeRecurso}\")\n" +
-                "        |> filter(fn: (r) => r[\"_field\"] == \"latencia\")\n" +
-                "        |> group(columns: [\"nome_provedor\"])\n" +
-                "        |> mean()\n" +
-                "    errorCount = from(bucket: \"logs\")\n" +
-                "        |> range(start: -5m)\n" + // todo: testando
-                "        |> filter(fn: (r) => r[\"_measurement\"] == \"metricas_recursos\")\n" +
-                "        |> filter(fn: (r) => r[\"_field\"] == \"sucesso\")\n" +
-                $"       |> filter(fn: (r) => r[\"nome_recurso\"] == \"{nomeRecurso}\")\n" +
-                "        |> filter(fn: (r) => r[\"_value\"] == 0, onEmpty: \"keep\")\n" +
-                "        |> group(columns: [\"nome_provedor\"])\n" +
-                "        |> count()\n" +
-                "    return join(tables: {meanLatency: meanLatency, errorCount: errorCount}, on: [\"nome_provedor\"])\n" +
-                "        |> map(fn: (r) => ({provider: r.nome_provedor, mean_latency: r._value_meanLatency, " +
-                "               error_count: r._value_errorCount}))\n" +
-                "        |> sort(columns: [\"error_count\"])\n" +
-                "        |> yield(name: \"ranking\")\n" +
-                "}\n" +
-                "ranking()";
-        
-            var fluxTables = await queryApi.QueryAsync(query, "broker");
-        
-            var provedores = (
-                from fluxTable in fluxTables
-                from fluxRecord in fluxTable.Records
-                select new Dictionary<string, object>
-                {
-                    { "name", fluxRecord.GetValueByKey("provider") },
-                    { "response_time", Convert.ToDouble(fluxRecord.GetValueByKey("mean_latency")) },
-                    { "error_rate", Convert.ToInt32(fluxRecord.GetValueByKey("error_count")) }
-                }).ToList();
-
-            var listaProvedoresDisponiveis = provedores.Any()
-                ? string.Join(",", provedores.Select(p => (string)p["name"]))
-                : "0";
-
-            Log.Information(
-                "Base de monitoramento retornou os provedores para o recurso '{NomeRecurso}'. " +
-                "Provedores: {ProvedoresDisponiveis}",
-                nomeRecurso, listaProvedoresDisponiveis
-            );
-        
-            return provedores;
-        }
-        catch (Exception)
-        {
-            Log.Warning("Erro ao obter dados de provedores no InfluxDB");
             throw;
         }
     }
