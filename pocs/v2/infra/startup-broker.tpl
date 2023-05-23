@@ -7,12 +7,17 @@ sudo systemctl start docker.service
 
 sudo docker info
 
+echo "Creating Redis container..."
+sleep 20
+docker run --name redis -d -p 6379:6379 redis
+
+
 echo "Creating API Broker container..."
 
 # Aguardar um pouco para o provedor também ser inicializado
 # por completo antes do broker começar a chamá-lo e
 # aguardar as configurações de rede na instância
-sleep 60
+sleep 40
 
 sudo docker run -d \
   --name=broker \
@@ -26,7 +31,7 @@ sudo docker run -d \
   -e Recursos__0__provedores__2__rota=http://${dns_provedor[2].public_dns}/widenet/{cep} \
   -e Recursos__0__provedores__2__healthcheck__rotaHealthcheck=http://${dns_provedor[2].public_dns}/widenet/01222020 \
   -e PortalSettings__Host=http://portal:3000 \
+  -e RedisCache__Host=localhost \
   pedrofgd/tcc-broker:v0.1.1
 
-echo "Setting up API Broker container..."
-sleep 5
+echo "Broker is now good to go!"
