@@ -129,12 +129,16 @@ public class Orquestrador
         
         watch.Stop();
         LogPerformanceBroker(solicitacao.NomeRecurso, ProvedorSelecionado, QtdeProvedoresTentados,
-            SucessoNaRequisicao, TempoTotalRespostaProvedores, 
-            watch.ElapsedMilliseconds);
+            listaProvedores.Count, SucessoNaRequisicao, 
+            TempoTotalRespostaProvedores, watch.ElapsedMilliseconds);
 
         LogPerformanceCodigo(watch.ElapsedMilliseconds);
-        
-        Log.Information("Requisição processada. Pronto para responder");
+
+        Log.Information(
+            "Requisição processada. Pronto para responder. " +
+            "SucessoNaRequisicao: {SucessoNaRequisicao}. QtdeProvedoresTentados: {QtdeProvedoresTentados}. " +
+            "QtdeProvedoresDisponiveis: {QtdeProvedoresDisponiveis}", 
+            SucessoNaRequisicao, QtdeProvedoresTentados, listaProvedores.Count);
     }
     
     /// <summary>
@@ -183,14 +187,16 @@ public class Orquestrador
     }
 
     private void LogPerformanceBroker(string nomeRecurso, string provedorSelecionado,
-        int qtdeProvedoresTentados, bool sucessoNaRequisicao, long tempoRespostaProvedores, long tempoRespostaTotal)
+        int qtdeProvedoresTentados, int qtdeProvedoresDisponiveis, bool sucessoNaRequisicao, 
+        long tempoRespostaProvedores, long tempoRespostaTotal)
     {
         var logDto = new LogPerformanceBrokerDto
         {
             NomeRecurso = nomeRecurso,
             ProvedorSelecionado = provedorSelecionado,
             QtdeProvedoresTentados = qtdeProvedoresTentados,
-            RetornouErroAoCliente = sucessoNaRequisicao,
+            QtdeProvedoresDisponiveis = qtdeProvedoresDisponiveis,
+            RetornouErroAoCliente = !sucessoNaRequisicao,
             TempoRespostaProvedores = tempoRespostaProvedores,
             TempoRespostaTotal = tempoRespostaTotal
         };

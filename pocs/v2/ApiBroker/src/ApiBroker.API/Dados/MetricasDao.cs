@@ -57,6 +57,7 @@ public class MetricasDao : IDisposable
                 .Field("tempo_resposta_total", logPerformanceBrokerDto.TempoRespostaTotal)
                 .Field("tempo_resposta_provedor", logPerformanceBrokerDto.TempoRespostaProvedores)
                 .Field("qtde_provedores_tentados", logPerformanceBrokerDto.QtdeProvedoresTentados)
+                .Field("qtde_provedores_disponiveis", logPerformanceBrokerDto.QtdeProvedoresDisponiveis)
                 .Field("retornou_erro_ao_cliente", logPerformanceBrokerDto.RetornouErroAoCliente)
                 .Timestamp(DateTime.UtcNow, WritePrecision.Ms);
 
@@ -96,6 +97,30 @@ public class MetricasDao : IDisposable
             Log.Warning(
                 "Erro ao registrar log de performance do código no InfluxDB para o componente {NomeComponente}. " +
                 "Erro: {MensagemErro}", logPerformanceCodigoDto.NomeComponente, e.Message);
+            throw;
+        }
+    }
+    
+    public void LogAcompanhamentoProvedores(int qtdeProvedoresDisponiveis, string provedoresDisponiveis)
+    {
+        try
+        {
+            Log.Debug("Registrando log para acompanhamento dos provedores");
+
+            var point = PointData.Measurement("acompanhamento_provedores")
+                .Field("qtde_provedores_disponiveis", qtdeProvedoresDisponiveis)
+                .Field("provedores_disponiveis", provedoresDisponiveis)
+                .Timestamp(DateTime.UtcNow, WritePrecision.Ms);
+
+            _writeApiAsync.WritePointAsync(point, "logs", "broker");
+            
+            Log.Information("Log para acompanhamento dos provedores registrado");
+        }
+        catch (Exception e)
+        {
+            Log.Warning(
+                "Erro ao registrar log para acompanhamento dos provedores" +
+                "Erro: {MensagemErro}", e.Message);
             throw;
         }
     }

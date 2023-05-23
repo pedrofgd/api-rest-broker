@@ -9,7 +9,6 @@ namespace ApiBroker.API.Ranqueamento;
 public class Ranqueador
 {
     private readonly MetricasDao _metricasDao;
-    private readonly IConnectionMultiplexer _redis;
     private readonly IDatabase _redisDb;
 
     public Ranqueador(
@@ -17,7 +16,6 @@ public class Ranqueador
         IConnectionMultiplexer redis)
     {
         _metricasDao = metricasDao;
-        _redis = redis;
         _redisDb = redis.GetDatabase();
     }
     
@@ -40,6 +38,7 @@ public class Ranqueador
         
         watch.Stop();
         LogPerformanceCodigo(watch.ElapsedMilliseconds);
+        LogAcompanhamentoProvedores(ordemProvedores.Count, string.Join(",", ordemProvedores));
 
         return !provedoresDisponiveis.Any() ? new List<string>() : ordemProvedores;
     }
@@ -52,5 +51,10 @@ public class Ranqueador
             TempoProcessamento = tempoProcessamento
         };
         _metricasDao.LogPerformanceCodigo(logDto);
+    }
+    
+    private void LogAcompanhamentoProvedores(int qtdeProvedoresDisponiveis, string provedoresDisponiveis)
+    {
+        _metricasDao.LogAcompanhamentoProvedores(qtdeProvedoresDisponiveis, provedoresDisponiveis);
     }
 }
