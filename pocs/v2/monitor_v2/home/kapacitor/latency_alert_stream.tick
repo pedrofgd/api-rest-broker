@@ -1,4 +1,4 @@
-var limit = 400
+var limit = 300
 var threshold = 10
 
 stream
