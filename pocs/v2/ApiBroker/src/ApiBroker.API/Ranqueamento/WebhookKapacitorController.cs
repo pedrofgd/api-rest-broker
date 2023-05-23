@@ -38,7 +38,7 @@ public class WebhookKapacitorController : ControllerBase
             var valorLatencia = alerta.data.series.First().values[indexLatencia].ToString();
             ArgumentException.ThrowIfNullOrEmpty(valorLatencia);
             
-            double latenciaMedia = double.Parse(Regex.Replace(valorLatencia, @"[^\d]", ""));
+            var latenciaMedia = double.Parse(Regex.Replace(valorLatencia, @"[^\d]", ""));
             TratarProvedorComPerformanceRuim(nomeRecurso, nomeProvedor, latenciaMedia);
         }
     }

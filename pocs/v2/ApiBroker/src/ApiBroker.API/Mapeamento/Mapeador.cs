@@ -5,6 +5,7 @@ using ApiBroker.API.Broker;
 using ApiBroker.API.Configuracoes;
 using ApiBroker.API.Dados;
 using Newtonsoft.Json;
+using Serilog;
 
 namespace ApiBroker.API.Mapeamento;
 
@@ -120,7 +121,8 @@ public class Mapeador
 
         // todo: avaliar incluir parse dos campos também, para tipos especificados pelo cliente
 
-        conteudoMapeado["provedor"] =  provedorAcionado.Nome;
+        if (conteudoMapeado != null)
+            conteudoMapeado["provedor"] =  provedorAcionado.Nome;
 
         var respostaMapeada = new RespostaMapeada
         {
@@ -154,7 +156,17 @@ public class Mapeador
             
             var prop = json;
             foreach (var s in path)
-                prop = prop.Value.GetProperty(s);
+            {
+                JsonElement propOut;
+                var valid = prop.Value.TryGetProperty(s, out propOut);
+                if (valid)
+                    prop = propOut;
+                else
+                {
+                    Log.Warning("Falha no mapeamento: campo {NomeCampo} não retornado pelo provedor", s);
+                    return null;
+                };
+            }
 
             campos.Add(formato?.NomeDesejado ?? campoEsperado, prop.Value.GetString());
         }
