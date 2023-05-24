@@ -6,14 +6,14 @@ public class HealthcheckFakeHandler : IHealthCheck
 {
     public Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = new CancellationToken())
     {
-        // var sla = RandomDataUtils.SomeInt(100);
-        // return sla > 90
-        //     ? Task.FromResult(HealthCheckResult.Unhealthy("Unhealthy"))
-        //     : Task.FromResult(sla > 80
-        //         ? HealthCheckResult.Degraded("Degraded")
-        //         : HealthCheckResult.Healthy("Healthy"));
+        var sla = RandomDataUtils.SomeInt(100);
+        return sla > 90
+            ? Task.FromResult(HealthCheckResult.Unhealthy("Unhealthy"))
+            : Task.FromResult(sla > 80
+                ? HealthCheckResult.Degraded("Degraded")
+                : HealthCheckResult.Healthy("Healthy"));
         
         // todo: remover
-        return Task.FromResult(HealthCheckResult.Healthy("Healthy"));
+        // return Task.FromResult(HealthCheckResult.Healthy("Healthy"));
     }
 }

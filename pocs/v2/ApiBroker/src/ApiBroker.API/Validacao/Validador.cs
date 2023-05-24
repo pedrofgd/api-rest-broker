@@ -45,6 +45,8 @@ public class Validador
 
     private bool CompletudeAtingida(Dictionary<string, string> camposRespostaProvedor)
     {
+        if (camposRespostaProvedor is null) return false;
+        
         foreach (var campoObrigatorio in _criterios.CamposObrigatorios)
         {
             var resposta = camposRespostaProvedor
