@@ -13,7 +13,7 @@ data
         .info(lambda: "sucesso" == 1)
         .crit(lambda: "consecutive_error" >= threshold)
         .log('/var/log/kapacitor/alerts-errors.log')
-        .post('http://host.docker.internal:5070/webhook/kapacitor')
+        .post({{KAPACITOR_WEBHOOK_URL}})
             .skipSSLVerification()
         .stateChangesOnly()
         .noRecoveries() // Preventing OK-level alerts

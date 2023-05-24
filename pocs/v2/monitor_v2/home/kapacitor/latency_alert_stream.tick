@@ -13,5 +13,5 @@ stream
         .details('The past {{ index .Fields "consecutive_count" }} requests had latency higher than the limit for "nome_recurso": {{ index .Tags "nome_recurso" }} and "nome_provedor": {{ index .Tags "nome_provedor" }}.')
         .crit(lambda: "consecutive_count" > threshold)
         .log('/var/log/kapacitor/alerts-latency.log')
-        .post('http://host.docker.internal:5070/webhook/webhook')
+        .post({{KAPACITOR_WEBHOOK_URL}})
             .skipSSLVerification()
