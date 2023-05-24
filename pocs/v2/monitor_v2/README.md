@@ -48,8 +48,8 @@ Utilizar `docker build -t pedrofgd/tcc-monitor-kapacitor:<TAG> .` no diretório 
 
 Exemplo:
 ``` bash
-docker build -t pedrofgd/tcc-monitor-kapacitor:v0.1.0 .
-docker build -t pedrofgd/tcc-monitor-kapacitor:latest .
+docker build --no-cache --platform linux/arm64 -t pedrofgd/tcc-monitor-kapacitor:v0.1.0 .
+docker build --no-cache --platform linux/arm64 -t pedrofgd/tcc-monitor-kapacitor:latest .
 ```
 
 Criar uma imagem com a tag com versionamento semantico e a tag `latest` junto, para facilitar o controle de versão.
