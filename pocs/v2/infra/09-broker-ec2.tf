@@ -1,6 +1,7 @@
 resource "aws_network_interface" "broker" {
   subnet_id       = aws_subnet.public_subnets[1].id
   security_groups = [aws_security_group.broker.id]
+  private_ips     = [var.private_ip_broker]
 
   tags = local.common_tags
 }
@@ -17,7 +18,7 @@ resource "aws_instance" "broker" {
 
   user_data = templatefile("${path.module}/startup-broker.tpl", {
     dns_provedor = aws_instance.provedor,
-    dns_influx = aws_instance.influx.public_dns,
+    dns_influx   = aws_instance.influx.public_dns,
     token_influx = var.influx_admin_token
   })
 

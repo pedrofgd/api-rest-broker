@@ -7,7 +7,7 @@ resource "aws_network_interface" "influx" {
 
 resource "aws_instance" "influx" {
   ami           = "ami-0bf606f6236128bd0" # Ubuntu Server 20.04 LTS (HVM), SSD Volume Type (64 bits (Arm))
-  instance_type = "t4g.xlarge"
+  instance_type = var.default_ec2_instance_type
   key_name      = aws_key_pair.key_pair.key_name
 
   network_interface {
@@ -15,8 +15,8 @@ resource "aws_instance" "influx" {
     device_index         = 0
   }
 
-  user_data = templatefile("${path.module}/startup-influx.tpl",{
-    token_influx = var.influx_admin_token
+  user_data = templatefile("${path.module}/startup-influx.tpl", {
+    broker_ip = var.private_ip_broker
   })
 
   tags = local.common_tags

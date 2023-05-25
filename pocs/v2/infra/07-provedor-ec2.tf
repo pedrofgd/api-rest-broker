@@ -1,5 +1,5 @@
 resource "aws_network_interface" "provedor" {
-  count = 3
+  count           = 3
   subnet_id       = aws_subnet.public_subnets[0].id
   security_groups = [aws_security_group.provedor.id]
 

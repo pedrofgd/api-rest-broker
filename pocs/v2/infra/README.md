@@ -45,13 +45,15 @@ Isso aconteceu algumas vezes durante os testes. A melhor solução foi aumentar 
 Antes de tudo, fazer o upload das imagens das aplicações (broker e frontend) para o Docker Hub:
 ``` bash
 # Fazer o build da imagem Docker
-docker build --no-cache -t pedrofgd/tcc-broker:v0.1.0 .
+docker build --no-cache -t pedrofgd/tcc-broker:v0.2.0 .
+docker build --no-cache -t pedrofgd/tcc-broker:latest .
 
 # Fazer login no Docker Hub
 docker login
 
 # Fazer o push da imagem Docker para o Docker Hub
-docker push pedrofgd/tcc-broker:v0.1.0
+docker push pedrofgd/tcc-broker:v0.2.0
+docker push pedrofgd/tcc-broker:latest
 ```
 
 **Obs1:** fazer isso para todas as imagens necessárias.
@@ -86,7 +88,7 @@ docker run -d \
 
 Essa configuração já cria tudo que é necessário para o broker começar a enviar as métricas e obter os dados de provedores disponíveis. Esse comando substitui os [processos manuais de configuração do Influx, definidos na primeira PoC](https://github.com/pedrofgd/tcc-mack/tree/main/pocs/v2/monitor).
 
-E então obter o token para escrever/ler do banco de dados:
+E então obter o token para escrever/ler do banco de dados (obrigatório na versão 2.x do InfluxDB):
 ``` bash
 INFLUX_ACCESS_TOKEN=$(docker exec influxdb influx auth list | awk '/admin/ {print $4}')
 ```
@@ -141,13 +143,15 @@ Utilizar a aplicação de provedor fake criada com Spring Boot e Java 17:
 
 ``` bash
 # Fazer o build da imagem Docker utilizando o Dockerfile na raíz da aplicação
-docker build -t pedrofgd/tcc-provedor-fake:v0.1.0 .
+docker build --platform linux/arm64 -t pedrofgd/tcc-provedor-fake:v0.2.0 .
+docker build --platform linux/arm64 -t pedrofgd/tcc-provedor-fake:latest .
 
 # Fazer o login no Docker Hub
 docker login
 
 # Fazer o push da imagem Docker para o Docker Hub
-docker push pedrofgd/tcc-provedor-fake:v0.1.0
+docker push pedrofgd/tcc-provedor-fake:v0.2.0
+docker push pedrofgd/tcc-provedor-fake:latest
 ```
 
 Utilizar o comando `docker run` para criar o container do provedor fake:
