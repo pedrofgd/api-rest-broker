@@ -6,7 +6,7 @@
 
 ## Links
 
-[Artigo](https://docs.google.com/document/d/1fR3Ditn7F5lTSZ8J-bHCE95sdXci6AMmVyiAGfeqm-s/edit?usp=sharing)
+[Artigo](https://docs.google.com/document/d/118qRB2vX_wGqq78INuhavfcFy0BIZc0PalTW0-9q3e8/edit?usp=sharing)
 
 [Slides TCC I](https://docs.google.com/presentation/d/12rQBoJsv4llBxazRHVSWoSko-HBzEbT2uWz4XlslTm0/edit?usp=sharing)
 
