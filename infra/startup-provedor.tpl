@@ -11,4 +11,5 @@ sudo docker info
 sudo docker run -d \
   --name=provedor-fake \
   -p 80:8080 \
+  -e AVAILABILITY=98 \
   pedrofgd/tcc-provedor-fake:latest
