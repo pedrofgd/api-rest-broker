@@ -21,13 +21,16 @@ public class TestContoller {
     private Random random;
 
     @PostMapping("/correios-alt/{cep}")
-    public ResponseEntity<DeferredResult<CorreiosAltDTO>> correiosAltTest(@PathVariable String cep) {
+    public DeferredResult<ResponseEntity<CorreiosAltDTO>> correiosAltTest(@PathVariable String cep) {
         log.info("INÍCIO REQUISIÇÃO PARA CORREIOS-ALT:: {}", cep);
+
+        var result = new DeferredResult<ResponseEntity<CorreiosAltDTO>>();
+
         if (random.nextInt(1, 100) > availability) {
             log.error("FALHA REQUISIÇÃO PARA CORREIOS-ALT:: {}", cep);
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            result.setResult(new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR));
+            return result;
         }
-        var result = new DeferredResult<CorreiosAltDTO>();
         ForkJoinPool.commonPool().submit(() -> {
             var dto = CorreiosAltDTO.builder()
                     .mensagem(UUID.randomUUID().toString())
@@ -53,20 +56,24 @@ public class TestContoller {
                             .faixasCep(UUID.randomUUID().toString())
                             .build())
                     .build();
-            result.setResult(dto);
+            result.setResult(new ResponseEntity<>(dto, HttpStatus.OK));
         });
         log.info("FIM DA REQUISIÇÃO PARA CORREIOS-ALT:: {}", cep);
-        return new ResponseEntity<>(result, HttpStatus.OK);
+        return result;
     }
 
     @GetMapping("/via-cep/{cep}")
-    public ResponseEntity<DeferredResult<ViaCepDTO>> viaCepTest(@PathVariable String cep) {
+    public DeferredResult<ResponseEntity<ViaCepDTO>> viaCepTest(@PathVariable String cep) {
         log.info("INÍCIO REQUISIÇÃO PARA VIA-CEP:: {}", cep);
+
+        var result = new DeferredResult<ResponseEntity<ViaCepDTO>>();
+
         if (random.nextInt(1, 100) > availability) {
             log.error("FALHA REQUISIÇÃO PARA VIA-CEP:: {}", cep);
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            result.setResult(new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR));
+            return result;
         }
-        var result = new DeferredResult<ViaCepDTO>();
+
         ForkJoinPool.commonPool().submit(() -> {
             var dto = ViaCepDTO.builder()
                     .cep(cep)
@@ -80,20 +87,26 @@ public class TestContoller {
                     .ddd(UUID.randomUUID().toString())
                     .siafi(UUID.randomUUID().toString())
                     .build();
-            result.setResult(dto);
+            result.setResult(new ResponseEntity<>(dto, HttpStatus.OK));
         });
+
         log.info("FIM DA REQUISIÇÃO PARA VIA-CEP:: {}", cep);
-        return new ResponseEntity<>(result, HttpStatus.OK);
+        return result;
     }
 
     @GetMapping("/widenet/{cep}")
-    public ResponseEntity<DeferredResult<WidenetDTO>> widenetTest(@PathVariable String cep) {
+    public DeferredResult<ResponseEntity<WidenetDTO>> widenetTest(@PathVariable String cep) {
         log.info("INÍCIO REQUISIÇÃO PARA WIDENET:: {}", cep);
+
+        var result = new DeferredResult<ResponseEntity<WidenetDTO>>();
+
+
         if (random.nextInt(1, 100) > availability) {
             log.error("FALHA REQUISIÇÃO PARA WIDENET:: {}", cep);
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            result.setResult(new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR));
+            return result;
         }
-        var result = new DeferredResult<WidenetDTO>();
+
         ForkJoinPool.commonPool().submit(() -> {
             var dto = WidenetDTO.builder()
                     .code(cep)
@@ -102,10 +115,10 @@ public class TestContoller {
                     .district(UUID.randomUUID().toString())
                     .address(UUID.randomUUID().toString())
                     .build();
-            result.setResult(dto);
+            result.setResult(new ResponseEntity<>(dto, HttpStatus.OK));
         });
         log.info("FIM DA REQUISIÇÃO PARA WIDENET:: {}", cep);
-        return new ResponseEntity<>(result, HttpStatus.OK);
+        return result;
     }
 
 }

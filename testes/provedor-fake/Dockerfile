@@ -19,5 +19,7 @@ COPY . .
 # Expose the port that the application will run on
 EXPOSE 8080
 
-ENTRYPOINT ["./gradlew", "bootRun", "--no-daemon", "--args=--server.port=8080"]
+ENV AVAILABILITY $AVAILABILITY
+
+ENTRYPOINT ["./gradlew", "bootRun", "--no-daemon", "--args=--server.port=8080", "-PjvmArgs=-Davailability=$AVAILABILITY"]
 
