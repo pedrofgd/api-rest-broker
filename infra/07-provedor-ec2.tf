@@ -10,7 +10,7 @@ resource "aws_network_interface" "provedor" {
 
 resource "aws_instance" "provedor" {
   count         = 3
-  ami           = "ami-0c00453583aaf434e" # Ubuntu Server 22.04 LTS (HVM), SSD Volume Type (64 bits (Arm))
+  ami           = var.default_ec2_ami
   instance_type = var.default_ec2_instance_type
   key_name      = aws_key_pair.key_pair.key_name
 

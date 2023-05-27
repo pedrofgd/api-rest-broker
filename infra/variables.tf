@@ -34,6 +34,12 @@ variable "default_ec2_instance_type" {
   default     = "t4g.xlarge"
 }
 
+variable "default_ec2_ami" {
+  type        = string
+  description = "Default AMI for instances is Ubuntu Server 22.04 LTS (HVM), SSD Volume Type (64 bits (Arm))"
+  default     = "ami-0aba9f6e2597c6993"
+}
+
 variable "influx_admin_token" {
   type        = string
   description = "Token for influx authentication"
