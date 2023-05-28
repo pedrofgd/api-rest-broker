@@ -14,7 +14,7 @@ import java.util.concurrent.ForkJoinPool;
 @Log4j2
 @RestController
 @AllArgsConstructor
-@RequestMapping("/")
+@RequestMapping("/seq")
 public class TestContollerSeq {
 
     @PostMapping("/correios-alt/{cep}")

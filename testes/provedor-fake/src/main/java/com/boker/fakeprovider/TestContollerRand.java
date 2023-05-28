@@ -14,7 +14,7 @@ import java.util.concurrent.ForkJoinPool;
 @Log4j2
 @RestController
 @AllArgsConstructor
-@RequestMapping("/rand")
+@RequestMapping("/")
 public class TestContollerRand {
     private static final Integer availability = Integer.valueOf(System.getProperty("availability"));
 
