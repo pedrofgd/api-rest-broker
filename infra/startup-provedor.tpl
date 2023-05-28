@@ -10,6 +10,7 @@ sudo docker info
 # Criar container para o provedor fake
 sudo docker run -d \
   --name=provedor-fake \
+  --entrypoint sh \
   -p 80:8080 \
-  -e AVAILABILITY=98 \
-  pedrofgd/tcc-provedor-fake:latest
+  pedrofgd/tcc-provedor-fake:latest \
+  -c "./gradlew bootRun --args=--server.port=8080 -PjvmArgs=-Davailability=70"
