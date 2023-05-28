@@ -32,9 +32,9 @@ public class Validador
 
         Log.Information("Validando resposta do provedor...");
 
-        var criteriosAtingidos =
-            CompletudeAtingida(respostaMapeada.CamposMapeados) &&
-            StatusCodeAceito(respostaMapeada.HttpResponseMessage.StatusCode);
+        var criteriosAtingidos = 
+            StatusCodeAceito(respostaMapeada.HttpResponseMessage.StatusCode) &&
+            CompletudeAtingida(respostaMapeada.CamposMapeados);
 
         Log.Information("Validação da resposta do provedor concluída. Resultado validação = {ResultadoValidacao}",
             criteriosAtingidos);

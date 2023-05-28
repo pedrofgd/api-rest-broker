@@ -47,7 +47,9 @@ public class Ranqueador
                 string.Join(",", ordemProvedores));
         }
 
-        return !provedoresDisponiveis.Any() ? new List<string>() : ordemProvedores;
+        return provedoresDisponiveis.Any()
+            ? ordemProvedores
+            : solicitacao.Provedores.Select(x => x.Nome).ToList();
     }
 
     private void LogPerformanceCodigo(long tempoProcessamento)

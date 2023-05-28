@@ -45,6 +45,7 @@ public class Identificador
         return new SolicitacaoDto
         {
             NomeRecurso = recurso.Nome,
+            Provedores = recurso.Provedores,
             ParametrosRota = parametrosRotaMapeados,
             CamposResposta = recurso.CamposResposta,
             Criterios = recurso.Criterios,
