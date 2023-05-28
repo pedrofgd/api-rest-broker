@@ -16,8 +16,10 @@ WORKDIR /app
 # Copiar tudo (para testar...)
 COPY . . 
 
+RUN ./gradew clean && ./gradlew build -x test
+
 # Expose the port that the application will run on
 EXPOSE 8080
 
-ENTRYPOINT ["./gradlew", "bootRun", "--no-daemon", "--args=--server.port=8080", "-PjvmArgs=-Davailability=98"]
+ENTRYPOINT ["java", "-Xms256m", "-Xmx12800m", "-Davailability=98",  "-jar", "build/libs/fakeProvider-0.0.1-SNAPSHOT.jar"]
 
