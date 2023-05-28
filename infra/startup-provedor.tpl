@@ -12,5 +12,5 @@ sudo docker run -d \
   --name=provedor-fake \
   --entrypoint sh \
   -p 80:8080 \
-  pedrofgd/tcc-provedor-fake:latest \cd
+  pedrofgd/tcc-provedor-fake:latest \
   -c "java -Xms256m -Xmx12800m -Davailability=90 -jar build/libs/fakeProvider-0.0.1-SNAPSHOT.jar"
