@@ -1,36 +1,27 @@
 package com.boker.fakeprovider;
 
-import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.DeferredResult;
 
-import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.ForkJoinPool;
 
 @Log4j2
 @RestController
-@AllArgsConstructor
 @RequestMapping("/")
-public class TestContoller {
-    private static final Integer availability = Integer.valueOf(System.getProperty("availability"));
-
-    private Random random;
+public class TestContollerSeq {
+    private static final Long REQUEST_CORREIOS_ALT = 10L;
+    private static final Long REQUEST_VIA_CEP = 10L;
+    private static final Long REQUEST_WIDENET = 10L;
+    private Long requests = 0L;
 
     @PostMapping("/correios-alt/{cep}")
-    public DeferredResult<ResponseEntity<CorreiosAltDTO>> correiosAltTest(@PathVariable String cep) {
-        log.info("INÍCIO REQUISIÇÃO PARA CORREIOS-ALT:: {}", cep);
-
-        var result = new DeferredResult<ResponseEntity<CorreiosAltDTO>>();
-
-        if (random.nextInt(1, 100) > availability) {
-            log.error("FALHA REQUISIÇÃO PARA CORREIOS-ALT:: {}", cep);
-            result.setResult(new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR));
-            return result;
-        }
+    public DeferredResult<CorreiosAltDTO> correiosAltTest(@PathVariable String cep) {
+        log.info("INÍCIO REQUISIÇÃO PARA CORREIOS-ALT:: {}",cep);
+        requests++;
+        if (requests % 20 >= REQUEST_CORREIOS_ALT) throw new RuntimeException();
+        var result = new DeferredResult<CorreiosAltDTO>();
         ForkJoinPool.commonPool().submit(() -> {
             var dto = CorreiosAltDTO.builder()
                     .mensagem(UUID.randomUUID().toString())
@@ -56,24 +47,18 @@ public class TestContoller {
                             .faixasCep(UUID.randomUUID().toString())
                             .build())
                     .build();
-            result.setResult(new ResponseEntity<>(dto, HttpStatus.OK));
+            result.setResult(dto);
         });
-        log.info("FIM DA REQUISIÇÃO PARA CORREIOS-ALT:: {}", cep);
+        log.info("FIM DA REQUISIÇÃO PARA CORREIOS-ALT:: {}",cep);
         return result;
     }
 
     @GetMapping("/via-cep/{cep}")
-    public DeferredResult<ResponseEntity<ViaCepDTO>> viaCepTest(@PathVariable String cep) {
-        log.info("INÍCIO REQUISIÇÃO PARA VIA-CEP:: {}", cep);
-
-        var result = new DeferredResult<ResponseEntity<ViaCepDTO>>();
-
-        if (random.nextInt(1, 100) > availability) {
-            log.error("FALHA REQUISIÇÃO PARA VIA-CEP:: {}", cep);
-            result.setResult(new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR));
-            return result;
-        }
-
+    public DeferredResult<ViaCepDTO> viaCepTest(@PathVariable String cep) {
+        log.info("INÍCIO REQUISIÇÃO PARA VIA-CEP:: {}",cep);
+        requests++;
+        if (requests % 20 >= REQUEST_VIA_CEP) throw new RuntimeException();
+        var result = new DeferredResult<ViaCepDTO>();
         ForkJoinPool.commonPool().submit(() -> {
             var dto = ViaCepDTO.builder()
                     .cep(cep)
@@ -87,26 +72,18 @@ public class TestContoller {
                     .ddd(UUID.randomUUID().toString())
                     .siafi(UUID.randomUUID().toString())
                     .build();
-            result.setResult(new ResponseEntity<>(dto, HttpStatus.OK));
+            result.setResult(dto);
         });
-
-        log.info("FIM DA REQUISIÇÃO PARA VIA-CEP:: {}", cep);
+        log.info("FIM DA REQUISIÇÃO PARA VIA-CEP:: {}",cep);
         return result;
     }
 
     @GetMapping("/widenet/{cep}")
-    public DeferredResult<ResponseEntity<WidenetDTO>> widenetTest(@PathVariable String cep) {
-        log.info("INÍCIO REQUISIÇÃO PARA WIDENET:: {}", cep);
-
-        var result = new DeferredResult<ResponseEntity<WidenetDTO>>();
-
-
-        if (random.nextInt(1, 100) > availability) {
-            log.error("FALHA REQUISIÇÃO PARA WIDENET:: {}", cep);
-            result.setResult(new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR));
-            return result;
-        }
-
+    public DeferredResult<WidenetDTO> widenetTest(@PathVariable String cep) {
+        log.info("INÍCIO REQUISIÇÃO PARA WIDENET:: {}",cep);
+        requests++;
+        if (requests % 20 >= REQUEST_WIDENET) throw new RuntimeException();
+        var result = new DeferredResult<WidenetDTO>();
         ForkJoinPool.commonPool().submit(() -> {
             var dto = WidenetDTO.builder()
                     .code(cep)
@@ -115,9 +92,9 @@ public class TestContoller {
                     .district(UUID.randomUUID().toString())
                     .address(UUID.randomUUID().toString())
                     .build();
-            result.setResult(new ResponseEntity<>(dto, HttpStatus.OK));
+            result.setResult(dto);
         });
-        log.info("FIM DA REQUISIÇÃO PARA WIDENET:: {}", cep);
+        log.info("FIM DA REQUISIÇÃO PARA WIDENET:: {}",cep);
         return result;
     }
 
