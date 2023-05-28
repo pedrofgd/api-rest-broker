@@ -166,7 +166,7 @@ public class Orquestrador
                 provedorAlvo, solicitacao.CamposResposta, _settings.GravarLogsPerformance);
 
             var validador = new Validador(solicitacao, _metricasRepository);
-            SucessoNaRequisicao = validador.Validar(respostaMapeada);
+            SucessoNaRequisicao = validador.Validar(respostaMapeada, _settings.GravarLogsPerformance);
 
             if (!SucessoNaRequisicao)
             {

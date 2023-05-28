@@ -26,7 +26,7 @@ public class Validador
         _metricasRepository = metricasRepository;
     }
 
-    public bool Validar(RespostaMapeada respostaMapeada)
+    public bool Validar(RespostaMapeada respostaMapeada, bool logPerformance = false)
     {
         var watch = Stopwatch.StartNew();
 
@@ -39,7 +39,8 @@ public class Validador
         Log.Information("Validação da resposta do provedor concluída. Resultado validação = {ResultadoValidacao}",
             criteriosAtingidos);
 
-        LogPerformanceCodigo(watch.ElapsedMilliseconds);
+        if (logPerformance)
+            LogPerformanceCodigo(watch.ElapsedMilliseconds);
 
         return criteriosAtingidos;
     }
