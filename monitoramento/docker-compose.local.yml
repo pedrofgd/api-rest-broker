@@ -1,0 +1,21 @@
+version: '3'
+services:
+  influxdb:
+    container_name: influxdb-1.8
+    image: "influxdb:1.8"
+    ports:
+      - 8086:8086
+    networks:
+      tik_net:
+  kapacitor:
+    container_name: kapacitor
+    image: "kapacitor:latest"
+    volumes:
+      - ./etc/kapacitor:/etc/kapacitor
+      - ./var/log/kapacitor:/var/log/kapacitor
+      - ./home/kapacitor:/home/kapacitor
+    networks:
+      tik_net:
+
+networks:
+  tik_net:

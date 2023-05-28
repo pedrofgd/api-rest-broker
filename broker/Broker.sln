@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{1D823162-A72C-4555-A5CD-49BCD633CC8B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Broker.API", "src\Broker.API\Broker.API.csproj", "{444A7DCC-4EB7-452B-9E74-9CF8D909186E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E22EAC44-0FB6-40B5-89DE-0D1AF2D9D506}"
+	ProjectSection(SolutionItems) = preProject
+		Dockerfile = Dockerfile
+		ApiBroker.sln.DotSettings = ApiBroker.sln.DotSettings
+		README.md = README.md
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{444A7DCC-4EB7-452B-9E74-9CF8D909186E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{444A7DCC-4EB7-452B-9E74-9CF8D909186E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{444A7DCC-4EB7-452B-9E74-9CF8D909186E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{444A7DCC-4EB7-452B-9E74-9CF8D909186E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{444A7DCC-4EB7-452B-9E74-9CF8D909186E} = {1D823162-A72C-4555-A5CD-49BCD633CC8B}
+	EndGlobalSection
+EndGlobal
