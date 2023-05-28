@@ -23,7 +23,7 @@ public class TestContollerSeq {
 
         var result = new DeferredResult<ResponseEntity<CorreiosAltDTO>>();
         var temp = LocalDateTime.now().getSecond();
-        if (!((temp >= 0 && temp < 10) || (temp>= 30 && temp <40))) {
+        if (((temp >= 0 && temp < 10) || (temp>= 30 && temp <40))) {
             log.error("FALHA REQUISIÇÃO PARA CORREIOS-ALT:: {}", cep);
             result.setResult(new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR));
             return result;
@@ -66,7 +66,7 @@ public class TestContollerSeq {
         var result = new DeferredResult<ResponseEntity<ViaCepDTO>>();
 
         var temp = LocalDateTime.now().getSecond();
-        if (!((temp >= 10 && temp < 20) || (temp>= 40 && temp <50))) {
+        if (((temp >= 10 && temp < 20) || (temp>= 40 && temp <50))) {
             log.error("FALHA REQUISIÇÃO PARA VIA-CEP:: {}", cep);
             result.setResult(new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR));
             return result;
@@ -99,7 +99,7 @@ public class TestContollerSeq {
         var result = new DeferredResult<ResponseEntity<WidenetDTO>>();
 
         var temp = LocalDateTime.now().getSecond();
-        if (!((temp >= 20 && temp <30) || (temp >= 50 && temp < 60))) {
+        if (((temp >= 20 && temp <30) || (temp >= 50 && temp < 60))) {
             log.error("FALHA REQUISIÇÃO PARA WIDENET:: {}", cep);
             result.setResult(new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR));
             return result;
