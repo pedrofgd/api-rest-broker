@@ -45,14 +45,14 @@ Isso aconteceu algumas vezes durante os testes. A melhor solução foi aumentar 
 Antes de tudo, fazer o upload das imagens das aplicações (broker e frontend) para o Docker Hub:
 ``` bash
 # Fazer o build da imagem Docker
-docker build --no-cache -t pedrofgd/tcc-broker:v0.2.0 .
-docker build --no-cache -t pedrofgd/tcc-broker:latest .
+docker build --platform linux/arm64 --no-cache -t pedrofgd/tcc-broker:v0.3.0 .
+docker build --platform linux/arm64 --no-cache -t pedrofgd/tcc-broker:latest .
 
 # Fazer login no Docker Hub
 docker login
 
 # Fazer o push da imagem Docker para o Docker Hub
-docker push pedrofgd/tcc-broker:v0.2.0
+docker push pedrofgd/tcc-broker:v0.3.0
 docker push pedrofgd/tcc-broker:latest
 ```
 
@@ -143,14 +143,14 @@ Utilizar a aplicação de provedor fake criada com Spring Boot e Java 17:
 
 ``` bash
 # Fazer o build da imagem Docker utilizando o Dockerfile na raíz da aplicação
-docker build --platform linux/arm64 -t pedrofgd/tcc-provedor-fake:v0.2.0 .
+docker build --platform linux/arm64 -t pedrofgd/tcc-provedor-fake:v0.3.0 .
 docker build --platform linux/arm64 -t pedrofgd/tcc-provedor-fake:latest .
 
 # Fazer o login no Docker Hub
 docker login
 
 # Fazer o push da imagem Docker para o Docker Hub
-docker push pedrofgd/tcc-provedor-fake:v0.2.0
+docker push pedrofgd/tcc-provedor-fake:v0.3.0
 docker push pedrofgd/tcc-provedor-fake:latest
 ```
 
