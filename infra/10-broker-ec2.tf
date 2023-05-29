@@ -3,7 +3,7 @@ resource "aws_network_interface" "broker" {
   security_groups = [aws_security_group.broker.id]
   private_ips     = [var.private_ip_broker]
 
-    tags = merge(local.common_tags, {
+  tags = merge(local.common_tags, {
     Name = "${local.name_prefix}-broker-net-interface"
   })
 }
