@@ -26,7 +26,7 @@ resource "aws_instance" "provedor-limiter" {
   })
 }
 
-output "provedor" {
-  value = aws_instance.provedor[*].public_dns
+output "provedor-limiter" {
+  value = aws_instance.provedor-limiter[*].public_dns
 }
 
