@@ -165,6 +165,21 @@ docker run -d \
 
 **Obs:** Cada provedor poderá rodar em uma máquina virtual, para simular uma situação mais próxima da realidade, com latência de rede etc. Então poderíamos criar sem utilizar a rede `tcc-network`, utilizada anteriormente com o API Broker e o InfluxDB.
 
+Para o provedor fake utilizando C# e o **Rate Limiter**, utilizar:
+
+``` bash
+# Fazer o build da imagem Docker utilizando o Dockerfile na raíz da aplicação
+docker build --platform linux/arm64 -t pedrofgd/tcc-provedor-fake-limiter:v0.1.0 .
+docker build --platform linux/arm64 -t pedrofgd/tcc-provedor-fake-limiter:latest .
+
+# Fazer o login no Docker Hub
+docker login
+
+# Fazer o push da imagem Docker para o Docker Hub
+docker push pedrofgd/tcc-provedor-fake-limiter:v0.1.0
+docker push pedrofgd/tcc-provedor-fake-limiter:latest
+```
+
 # Referências e documentação
 
 - [Terraform how to do SSH in AWS EC2 instance?](https://jhooq.com/terraform-ssh-into-aws-ec2/)
