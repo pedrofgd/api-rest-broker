@@ -2,7 +2,9 @@ resource "aws_network_interface" "influx" {
   subnet_id       = aws_subnet.public_subnets[1].id
   security_groups = [aws_security_group.influx.id]
 
-  tags = local.common_tags
+  tags = merge(local.common_tags, {
+    Name = "${local.name_prefix}-influx-net-interface"
+  })
 }
 
 resource "aws_instance" "influx" {

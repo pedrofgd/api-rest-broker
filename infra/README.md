@@ -45,14 +45,14 @@ Isso aconteceu algumas vezes durante os testes. A melhor solução foi aumentar 
 Antes de tudo, fazer o upload das imagens das aplicações (broker e frontend) para o Docker Hub:
 ``` bash
 # Fazer o build da imagem Docker
-docker build --platform linux/arm64 --no-cache -t pedrofgd/tcc-broker:v0.3.0 .
+docker build --platform linux/arm64 --no-cache -t pedrofgd/tcc-broker:v0.3.1 .
 docker build --platform linux/arm64 --no-cache -t pedrofgd/tcc-broker:latest .
 
 # Fazer login no Docker Hub
 docker login
 
 # Fazer o push da imagem Docker para o Docker Hub
-docker push pedrofgd/tcc-broker:v0.3.0
+docker push pedrofgd/tcc-broker:v0.3.1
 docker push pedrofgd/tcc-broker:latest
 ```
 
@@ -164,6 +164,21 @@ docker run -d \
 ```
 
 **Obs:** Cada provedor poderá rodar em uma máquina virtual, para simular uma situação mais próxima da realidade, com latência de rede etc. Então poderíamos criar sem utilizar a rede `tcc-network`, utilizada anteriormente com o API Broker e o InfluxDB.
+
+Para o provedor fake utilizando C# e o **Rate Limiter**, utilizar:
+
+``` bash
+# Fazer o build da imagem Docker utilizando o Dockerfile na raíz da aplicação
+docker build --platform linux/arm64 -t pedrofgd/tcc-provedor-fake-limiter:v0.1.0 .
+docker build --platform linux/arm64 -t pedrofgd/tcc-provedor-fake-limiter:latest .
+
+# Fazer o login no Docker Hub
+docker login
+
+# Fazer o push da imagem Docker para o Docker Hub
+docker push pedrofgd/tcc-provedor-fake-limiter:v0.1.0
+docker push pedrofgd/tcc-provedor-fake-limiter:latest
+```
 
 # Referências e documentação
 
