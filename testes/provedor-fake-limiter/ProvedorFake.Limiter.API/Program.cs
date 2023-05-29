@@ -42,7 +42,7 @@ app.MapPost("/correios-alt/{cep}", (string cep) => Results.Ok(new
     }
 })).RequireRateLimiting("fixed");
 
-app.MapGet("/viacep/{cep}", (string cep) => Results.Ok(new
+app.MapGet("/via-cep/{cep}", (string cep) => Results.Ok(new
 {
     cep,
     logradouro = Guid.NewGuid().ToString(),
