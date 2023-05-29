@@ -45,14 +45,14 @@ Isso aconteceu algumas vezes durante os testes. A melhor solução foi aumentar 
 Antes de tudo, fazer o upload das imagens das aplicações (broker e frontend) para o Docker Hub:
 ``` bash
 # Fazer o build da imagem Docker
-docker build --platform linux/arm64 --no-cache -t pedrofgd/tcc-broker:v0.3.0 .
+docker build --platform linux/arm64 --no-cache -t pedrofgd/tcc-broker:v0.3.1 .
 docker build --platform linux/arm64 --no-cache -t pedrofgd/tcc-broker:latest .
 
 # Fazer login no Docker Hub
 docker login
 
 # Fazer o push da imagem Docker para o Docker Hub
-docker push pedrofgd/tcc-broker:v0.3.0
+docker push pedrofgd/tcc-broker:v0.3.1
 docker push pedrofgd/tcc-broker:latest
 ```
 
