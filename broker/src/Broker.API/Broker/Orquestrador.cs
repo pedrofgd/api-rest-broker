@@ -73,6 +73,8 @@ public class Orquestrador
                 "Não há provedores disponíveis para atender a requisição");
             return;
         }
+        
+        Log.Information("QTDE disponíveis: {QtdeDisponiveis}", listaProvedores.Count);
 
         Log.Information("Requisição pronta para ser enviada ao provedor");
         var respostaMapeada = await RedirecionarRequisicao(context, solicitacao, listaProvedores);

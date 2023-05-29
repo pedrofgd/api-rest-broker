@@ -36,7 +36,6 @@ sudo docker run -d \
   -e Recursos__0__provedores__1__healthcheck__rotaHealthcheck=http://${dns_provedor[1].public_dns}/via-cep/01222020 \
   -e Recursos__0__provedores__2__rota=http://${dns_provedor[2].public_dns}/widenet/{cep} \
   -e Recursos__0__provedores__2__healthcheck__rotaHealthcheck=http://${dns_provedor[2].public_dns}/widenet/01222020 \
-  -e PortalSettings__Host=http://portal:3000 \
   -e RedisCache__Host=redis \
   pedrofgd/tcc-broker:latest
 

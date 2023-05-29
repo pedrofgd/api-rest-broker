@@ -3,7 +3,7 @@ resource "aws_network_interface" "broker" {
   security_groups = [aws_security_group.broker.id]
   private_ips     = [var.private_ip_broker]
 
-    tags = merge(local.common_tags, {
+  tags = merge(local.common_tags, {
     Name = "${local.name_prefix}-broker-net-interface"
   })
 }
@@ -19,7 +19,7 @@ resource "aws_instance" "broker" {
   }
 
   user_data = templatefile("${path.module}/startup-broker.tpl", {
-    dns_provedor = aws_instance.provedor,
+    dns_provedor = aws_instance.provedor-limiter,
     dns_influx   = aws_instance.influx.public_dns,
     token_influx = var.influx_admin_token
   })
